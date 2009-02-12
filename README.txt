@@ -1,4 +1,4 @@
-RVideo
+= RVideo
 
 RVideo allows you to inspect and process video files.
 
