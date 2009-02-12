@@ -13,6 +13,7 @@ require 'tools/ffmpeg2theora'
 require 'tools/yamdi'
 require 'errors'
 require 'transcoder'
+require 'rubygems'
 require 'active_support'
 
 TEMP_PATH = File.expand_path(File.dirname(__FILE__) + '/../tmp')
