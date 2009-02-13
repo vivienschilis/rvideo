@@ -28,6 +28,8 @@ NAME = "rvideo"
 REV    = `git log -n1 --pretty=oneline | cut -d' ' -f1`.strip
 BRANCH = `git branch | grep '*' | cut -d' ' -f2`.strip
 
+# This is not the version used for the gem. 
+# That is parsed from the CHANGELOG by Echoe.
 VERS = "#{RVideo::VERSION::STRING} (#{BRANCH} @ #{REV})"
 
 Echoe.new NAME do |p|
@@ -52,8 +54,5 @@ end
 
 # Load supporting Rake files
 Dir[File.dirname(__FILE__) + "/tasks/*.rake"].each { |t| load t }
-
-# Echo defines the :default task to run the :test task
-task :test => :spec
 
 puts "#{NAME} #{VERS}"

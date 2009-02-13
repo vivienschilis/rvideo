@@ -14,3 +14,6 @@ end
 
 desc "Run unit and integration specs"
 task :spec => ["spec:units", "spec:integrations"]
+
+# Echo defines the :default task to run the :test task
+task :test => :spec
