@@ -1,3 +1,9 @@
+simple_flv: |
+  ffmpeg -i $input_file$ -ar 22050 -ab 64 -f flv -r 29.97 -s $resolution$ -y $temp_file$
+  flvtool2 -U $temp_file$ $output_file$
+simple_avi: |
+  ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -s $resolution$ -y $output_file$
+
 hq_wmv:
  extension: 'wmv'
  command: |
