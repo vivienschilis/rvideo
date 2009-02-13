@@ -148,6 +148,8 @@ end
 desc "Run unit and integration specs"
 task :spec => ["spec:units", "spec:integrations"]
 
+task :default => :spec
+
 desc "Process a file"
 task(:transcode) do
   RVideo::Transcoder.logger = Logger.new(STDOUT)
