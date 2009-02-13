@@ -30,18 +30,6 @@ module RVideo # :nodoc:
           @command = interpolate_variables(raw_command)
         end
 
-        #
-        # Execute the command and parse the result.
-        #
-        # def execute
-        #   @output_params = {}
-        #   final_command = "#{@command} 2>&1"
-        #   Transcoder.logger.info("\nExecuting Command: #{final_command}\n")
-        #   @raw_result = `#{final_command}`
-        #   Transcoder.logger.info("Result: \n#{@raw_result}")
-        #   parse_result(@raw_result)
-        # end
-
         def execute
           @output_params = {}
           
@@ -180,8 +168,6 @@ module RVideo # :nodoc:
           h.merge!(get_fps).merge!(get_resolution)
         end
         
-        
-        
         def get_fit_to_width_resolution
           w = @options['width']
           raise TranscoderError::ParameterError, "invalid width of '#{w}' for fit to width" unless valid_dimension?(w)
@@ -309,7 +295,14 @@ module RVideo # :nodoc:
           raw_command.scan(/[^\\]\$[-_a-zA-Z]+\$/).each do |match|
             match = match[0..0] == "$" ? match : match[1..(match.size - 1)]
             match.strip!
-            raw_command.gsub!(match, matched_variable(match))
+            
+            value = if ["$input_file$", "$output_file$"].include?(match)
+              matched_variable(match).shell_quoted
+            else
+              matched_variable(match)
+            end
+            
+            raw_command.gsub!(match, value)
           end
           raw_command.gsub("\\$", "$")
         end
@@ -325,7 +318,7 @@ module RVideo # :nodoc:
           if self.respond_to? variable_name
             self.send(variable_name)
           elsif @options[variable_name] 
-            @options[variable_name] # || ""
+            @options[variable_name] || ""
           else
             raise TranscoderError::ParameterError,
               "command is looking for the #{variable_name} parameter, but it was not provided. (Command: #{@raw_command})"

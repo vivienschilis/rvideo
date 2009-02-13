@@ -1,6 +1,5 @@
 module RVideo # :nodoc:
   class Inspector
-  
     attr_reader :filename, :path, :full_filename, :raw_response, :raw_metadata
     
     attr_accessor :ffmpeg_binary
@@ -28,26 +27,14 @@ module RVideo # :nodoc:
     # 
 
     def initialize(options = {})
+      if not (options[:raw_response] or options[:file])
+        raise ArgumentError, "Must supply either an input file or a pregenerated response"
+      end
+      
       if options[:raw_response]
-        @raw_response = options[:raw_response]
+        initialize_with_raw_response(options[:raw_response])
       elsif options[:file]
-        if options[:ffmpeg_binary]
-          @ffmpeg_binary = options[:ffmpeg_binary]
-          raise RuntimeError, "ffmpeg could not be found (trying #{@ffmpeg_binary})" unless FileTest.exist?(@ffmpeg_binary)
-        else
-          # assume it is in the unix path
-          raise RuntimeError, 'ffmpeg could not be found (expected ffmpeg to be found in the Unix path)' unless FileTest.exist?(`which ffmpeg`.chomp)
-          @ffmpeg_binary = "ffmpeg"
-        end
-
-        file = options[:file]
-        @filename = File.basename(file)
-        @path = File.dirname(file)
-        @full_filename = file
-        raise TranscoderError::InputFileNotFound, "File not found (#{file})" unless FileTest.exist?(file.gsub("\"",""))
-        @raw_response = `#{@ffmpeg_binary} -i #{@full_filename} 2>&1`
-      else
-        raise ArgumentError, "Must supply either an input file or a pregenerated response" if options[:raw_response].nil? and file.nil?
+        initialize_with_file(options[:file], options[:ffmpeg_binary])
       end
 
       metadata = /(Input \#.*)\n.+\n\Z/m.match(@raw_response)
@@ -61,6 +48,35 @@ module RVideo # :nodoc:
       else
         @raw_metadata = metadata[1]
       end
+    end
+    
+    def initialize_with_raw_response(raw_response)
+      @raw_response = raw_response
+    end
+    
+    def initialize_with_file(file, ffmpeg_binary = nil)
+      if ffmpeg_binary
+        @ffmpeg_binary = ffmpeg_binary
+        if not FileTest.exist?(@ffmpeg_binary)
+          raise "ffmpeg could not be found (trying #{@ffmpeg_binary})" 
+        end
+      else
+        # assume it is in the unix path
+        if not FileTest.exist?(`which ffmpeg`.chomp)
+          raise "ffmpeg could not be found (expected ffmpeg to be found in the Unix path)"
+        end
+        @ffmpeg_binary = "ffmpeg"
+      end
+      
+      if not FileTest.exist?(file.gsub('"',''))
+        raise TranscoderError::InputFileNotFound, "File not found (#{file})"
+      end
+      
+      @full_filename = file
+      @filename      = File.basename(@full_filename)
+      @path          = File.dirname(@full_filename)
+      
+      @raw_response = `#{@ffmpeg_binary} -i #{@full_filename.shell_quoted} 2>&1`
     end
     
     #
@@ -152,16 +168,13 @@ module RVideo # :nodoc:
     
     def capture_frame(timecode, output_file = nil)
       t = calculate_time(timecode)
-      unless output_file
-        output_file = "#{TEMP_PATH}/#{File.basename(@full_filename, ".*")}-#{timecode.gsub("%","p")}.jpg"
-      end
-      # do the work
-      # mplayer $input_file$ -ss $start_time$ -frames 1 -vo jpeg -o $output_file$
-      # ffmpeg -i $input_file$ -v nopb -ss $start_time$ -b $bitrate$ -an -vframes 1 -y $output_file$
-      command = "ffmpeg -i #{@full_filename} -ss #{t} -t 00:00:01 -r 1 -vframes 1 -f image2 #{output_file}"
+      output_file ||= "#{TEMP_PATH}/#{File.basename(@full_filename, ".*")}-#{timecode.gsub("%","p")}.jpg"
+      command = "ffmpeg -i #{@full_filename.shell_quoted} -ss #{t} -t 00:00:01 -r 1 -vframes 1 -f image2 #{output_file.shell_quoted}"
+      
       Transcoder.logger.info("\nCreating Screenshot: #{command}\n")
       frame_result = `#{command} 2>&1`
       Transcoder.logger.info("\nScreenshot results: #{frame_result}")
+      
       output_file
     end
     

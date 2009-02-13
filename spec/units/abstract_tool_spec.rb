@@ -59,7 +59,7 @@ module RVideo
       
       it "should interpolate variables successfully" do
         ffmpeg = Ffmpeg.new(@simple_avi, @options)
-        ffmpeg.command.should == "ffmpeg -i #{@options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -y #{@options[:output_file]}"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -y '#{@options[:output_file]}'"
       end
       
       it "the matched_variable method should reference the variable without $" do
@@ -88,22 +88,22 @@ module RVideo
       
       it "the should not raise an error when a variable is supplied but nil" do
         ffmpeg = Ffmpeg.new(@simple_avi, @options.merge(:resolution => nil))
-        ffmpeg.command.should == "ffmpeg -i #{@options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -y #{@options[:output_file]}"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -y '#{@options[:output_file]}'"
       end
       
       it 'should ignore escaped leading \$' do
         ffmpeg = Ffmpeg.new('ffmpeg -i $input_file$ -ar 44100 -ab 64 -fakeoptions \$foo$ -vcodec xvid -acodec mp3 -r 29.97 $resolution$ -y $output_file$', @options)
-        ffmpeg.command.should == "ffmpeg -i #{@options[:input_file]} -ar 44100 -ab 64 -fakeoptions $foo$ -vcodec xvid -acodec mp3 -r 29.97 #{ffmpeg.resolution} -y #{@options[:output_file]}"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -fakeoptions $foo$ -vcodec xvid -acodec mp3 -r 29.97 #{ffmpeg.resolution} -y '#{@options[:output_file]}'"
       end
 
       it 'should ignore escaped trailing \$' do
         ffmpeg = Ffmpeg.new('ffmpeg -i $input_file$ -ar 44100 -ab 64 -fakeoptions $foo\$ -vcodec xvid -acodec mp3 -r 29.97 $resolution$ -y $output_file$', @options)
-        ffmpeg.command.should == "ffmpeg -i #{@options[:input_file]} -ar 44100 -ab 64 -fakeoptions $foo$ -vcodec xvid -acodec mp3 -r 29.97 #{ffmpeg.resolution} -y #{@options[:output_file]}"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -fakeoptions $foo$ -vcodec xvid -acodec mp3 -r 29.97 #{ffmpeg.resolution} -y '#{@options[:output_file]}'"
       end
 
       it 'should ignore two escaped \$' do
         ffmpeg = Ffmpeg.new('ffmpeg -i $input_file$ -ar 44100 -ab 64 -fakeoptions \$foo\$ -vcodec xvid -acodec mp3 -r 29.97 $resolution$ -y $output_file$', @options)
-        ffmpeg.command.should == "ffmpeg -i #{@options[:input_file]} -ar 44100 -ab 64 -fakeoptions $foo$ -vcodec xvid -acodec mp3 -r 29.97 #{ffmpeg.resolution} -y #{@options[:output_file]}"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -fakeoptions $foo$ -vcodec xvid -acodec mp3 -r 29.97 #{ffmpeg.resolution} -y '#{@options[:output_file]}'"
       end
     end
   end

@@ -45,28 +45,28 @@ module RVideo
       it 'should access the original fps (ffmpeg)' do
         options = {:input_file => spec_video("kites.mp4"), :output_file => "bar" }
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame $original_fps$ -s 320x240 -y $output_file$", options)
-        ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 10.00 -s 320x240 -y #{options[:output_file]}"
+        ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 10.00 -s 320x240 -y '#{options[:output_file]}'"
       end
       
       it 'should create width/height (ffmpeg)' do
         options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :width => "640", :height => "360"}
         command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
         ffmpeg = Ffmpeg.new(command, options)
-        ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x360 -y bar"
+        ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x360 -y 'bar'"
       end
       
       it 'should support calculated height' do
         options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :width => "640"}
         command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
         ffmpeg = Ffmpeg.new(command, options)
-        ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x528 -y bar"
+        ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x528 -y 'bar'"
       end
       
       it 'should support calculated width' do
         options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :height => "360"}
         command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
         ffmpeg = Ffmpeg.new(command, options)
-        ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 448x360 -y bar"
+        ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 448x360 -y 'bar'"
       end
       
       # These appear unsupported..
@@ -75,14 +75,14 @@ module RVideo
       #   options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :width => "640"}
       #   command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
       #   ffmpeg = Ffmpeg.new(command, options)
-      #   ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x720 -y bar"        
+      #   ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x720 -y 'bar'"        
       # end
       # 
       # it 'should support passthrough width' do
       #   options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :height => "360"}
       #   command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
       #   ffmpeg = Ffmpeg.new(command, options)
-      #   ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 1280x360 -y bar"        
+      #   ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 1280x360 -y 'bar'"        
       # end
     end
     
