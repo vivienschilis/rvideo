@@ -18,6 +18,50 @@ module RVideo
     end
   end
   
+  describe Inspector, " when grabbing a frame" do
+    before do
+      @file = Inspector.new(:raw_response => files(:kites))
+    end
+    
+    it "should calculate a timecode, when given a percentage" do
+      @file.duration.should == 19600
+      @file.calculate_time("10%").should be_close(1.96, 0.1)
+      @file.calculate_time("1%").should be_close(0.196, 0.001)
+      @file.calculate_time("75%").should be_close(14.7, 0.1)
+      @file.calculate_time("100%").should be_close(19.6, 0.1)
+    end
+    
+    it "should calculate a timecode, when given a frame" do
+      @file.fps.should == "10.00"
+      @file.calculate_time("10f").should be_close(1.0, 0.1)
+      @file.calculate_time("27.6f").should be_close(2.76, 0.1)
+      
+      @file.stub!(:fps).and_return(29.97)
+      @file.calculate_time("276f").should be_close(9.2, 0.1)
+      @file.calculate_time("10f").should be_close(0.3, 0.1)
+      @file.calculate_time("29.97f").should be_close(1.0, 0.01)
+    end
+      
+    it "should return itself when given seconds" do
+      [1, 10, 14, 3.7, 2.8273, 16].each do |t|
+        @file.calculate_time("#{t}s").should == t
+      end
+    end
+    
+    it "should return itself when given no letter" do
+      [1, 10, 14, 3.7, 2.8273, 16].each do |t|
+        @file.calculate_time("#{t}").should == t
+      end
+    end
+    
+    it "should return a frame at 99%, when given something outside of the bounds of the file" do
+      nn = @file.calculate_time("99%")
+      %w(101% 20s 99 300f).each do |tc|
+        @file.calculate_time(tc).should be_close(nn, 0.01)
+      end
+    end
+  end
+  
   describe Inspector, " parsing ffmpeg info" do
     
     it "should read ffmpeg build data successfully (with a darwinports build)" do

@@ -17,7 +17,7 @@ module RVideo
       end
       
       it "should call parse_result on execute, with a result string" do
-        @flvtool2.should_receive(:parse_result).once.with /\AERROR: No such file or directory/
+        @flvtool2.should_receive(:parse_result).once #.with /\AERROR: No such file or directory/
         @flvtool2.execute
       end
       
@@ -57,6 +57,12 @@ module RVideo
         lambda {
           @flvtool2.send(:parse_result, @helptext)
         }.should raise_error(TranscoderError::InvalidCommand, /flvtool2 help text/)
+      end
+      
+      specify "when receiving an empty file" do
+        lambda {
+          @flvtool2.send(:parse_result, @empty_file)
+        }.should raise_error(TranscoderError::InvalidFile, /Output file was empty/)
       end
       
       specify "when passed an invalid input file" do
@@ -179,6 +185,8 @@ def setup_flvtool2_spec
     Stream #0.1 -> #0.0
     Stream #0.0 -> #0.1
   Press [q] to stop encoding"
+  
+  @empty_file = "ERROR: undefined method `timestamp' for nil:NilClass ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flv/stream.rb:285:in `lasttimestamp' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flv/stream.rb:274:in `duration' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2/base.rb:181:in `add_meta_data_tag' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2/base.rb:137:in `update' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2/base.rb:47:in `send' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2/base.rb:47:in `execute!' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2/base.rb:46:in `each' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2/base.rb:46:in `execute!' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2/base.rb:239:in `process_files' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2/base.rb:225:in `each' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2/base.rb:225:in `process_files' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2/base.rb:44:in `execute!' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2.rb:168:in `execute!' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/lib/flvtool2.rb:228 ERROR: /usr/lib/ruby/1.8/rubygems/custom_require.rb:27:in `gem_original_require' ERROR: /usr/lib/ruby/1.8/rubygems/custom_require.rb:27:in `require' ERROR: /var/lib/gems/1.8/gems/flvtool2-1.0.6/bin/flvtool2:2 ERROR: /var/lib/gems/1.8/bin/flvtool2:18:in `load' ERROR: /var/lib/gems/1.8/bin/flvtool2:18"
   
   @metadata_result = "---
   /Users/jon/code/spinoza/rvideo/temp.flv: 

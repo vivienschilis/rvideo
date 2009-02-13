@@ -27,6 +27,19 @@ kites:
       Stream #0.0(und): Video: mpeg4, yuv420p, 176x144, 10.00 fps(r)
       Stream #0.1(und): Audio: samr / 0x726D6173, 8000 Hz, mono
     Must supply at least one output file
+kites2:
+  response: |
+    FFmpeg version SVN-r9102, Copyright (c) 2000-2007 Fabrice Bellard, et al.
+      configuration: --prefix=/opt/local --prefix=/opt/local --disable-vhook --mandir=/opt/local/share/man --enable-shared --enable-pthreads --disable-mmx --enable-gpl --enable-libmp3lame --enable-libogg --enable-libvorbis --enable-libtheora --enable-libfaac --enable-xvid --enable-x264 --enable-liba52
+      libavutil version: 49.4.0
+      libavcodec version: 51.40.4
+      libavformat version: 51.12.1
+      built on Dec 11 2007 12:00:30, gcc: 4.0.1 (Apple Inc. build 5465)
+    Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'spec/files/kites.mp4':
+      Duration: 00:00:19.6, start: 0.000000, bitrate: 98 kb/s
+      Stream #0.0(und): Video: mpeg4, yuv420p, 176x144, 10.00 fps(r)
+      Stream #0.1(und): Audio: samr / 0x726D6173, 8000 Hz, mono
+    Must supply at least one output file
 duck:
   response: |
     FFmpeg version CVS, Copyright (c) 2000-2004 Fabrice Bellard

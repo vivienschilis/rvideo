@@ -14,3 +14,5 @@ TEMP_PATH = File.expand_path(File.dirname(__FILE__) + '/../tmp')
 FIXTURE_PATH = File.expand_path(File.dirname(__FILE__) + '/../spec/fixtures')
 TEST_FILE_PATH = File.expand_path(File.dirname(__FILE__) + '/../spec/files')
 REPORT_PATH = File.expand_path(File.dirname(__FILE__) + '/../report')
+
+include RVideo

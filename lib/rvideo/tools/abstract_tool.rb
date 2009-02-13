@@ -14,8 +14,8 @@ module RVideo # :nodoc:
         # rescue NameError, /uninitialized constant/
           # raise TranscoderError::UnknownTool, "The recipe tried to use the '#{tool_name}' tool, which does not exist."
         rescue => e
-          LOGGER.info $!
-          LOGGER.info e.backtrace.join("\n")
+          Transcoder.logger.info $!
+          Transcoder.logger.info e.backtrace.join("\n")
         end
       end
       
@@ -81,6 +81,11 @@ module RVideo # :nodoc:
           format_fps(get_fps)
         end
         
+        def original_fps
+          @options["fps"] = "copy"
+          fps
+        end
+        
         def get_fps
           inspect_original if @original.nil?
           fps = @options['fps'] || ""
@@ -99,18 +104,22 @@ module RVideo # :nodoc:
         
         def get_resolution
           inspect_original if @original.nil?
-          resolution_setting = @options['resolution'] || ""
-          case resolution_setting
-          when "copy"
-            get_original_resolution
-          when "width"
-            get_fit_to_width_resolution
-          when "height"
-            get_fit_to_height_resolution
-          when "letterbox"
-            get_letterbox_resolution
+          
+          case @options['resolution']
+          when "copy"      then get_original_resolution
+          when "width"     then get_fit_to_width_resolution
+          when "height"    then get_fit_to_height_resolution
+          when "letterbox" then get_letterbox_resolution
           else
-            get_specific_resolution
+            if @options["width"] and not @options["height"]
+              get_fit_to_width_resolution
+            elsif @options["height"] and not @options["width"]
+              get_fit_to_height_resolution
+            elsif @options["width"] and @options["height"]
+              get_specific_resolution
+            else
+              get_original_resolution
+            end
           end
         end
         
@@ -315,10 +324,11 @@ module RVideo # :nodoc:
           variable_name = match.gsub("$","")
           if self.respond_to? variable_name
             self.send(variable_name)
-          elsif @options.key?(variable_name) 
-            @options[variable_name] || ""
+          elsif @options[variable_name] 
+            @options[variable_name] # || ""
           else
-            raise TranscoderError::ParameterError, "command is looking for the #{variable_name} parameter, but it was not provided. (Command: #{@raw_command})"
+            raise TranscoderError::ParameterError,
+              "command is looking for the #{variable_name} parameter, but it was not provided. (Command: #{@raw_command})"
           end
         end
         

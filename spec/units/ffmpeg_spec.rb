@@ -33,6 +33,59 @@ module RVideo
       
     end
     
+    describe Ffmpeg, " magic variables" do
+      before do
+        # mock_inspector = mock("inspector")
+        # Inspector.stub!(:new).and_return(mock_inspector)
+        # mock_inspector.stub!(:fps).and_return 23.98
+        # mock_inspector.stub!(:width).and_return 1280
+        # mock_inspector.stub!(:height).and_return 720
+      end
+      
+      it 'should access the original fps (ffmpeg)' do
+        options = {:input_file => spec_video("kites.mp4"), :output_file => "bar" }
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame $original_fps$ -s 320x240 -y $output_file$", options)
+        ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 10.00 -s 320x240 -y #{options[:output_file]}"
+      end
+      
+      it 'should create width/height (ffmpeg)' do
+        options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :width => "640", :height => "360"}
+        command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
+        ffmpeg = Ffmpeg.new(command, options)
+        ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x360 -y bar"
+      end
+      
+      it 'should support calculated height' do
+        options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :width => "640"}
+        command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
+        ffmpeg = Ffmpeg.new(command, options)
+        ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x528 -y bar"
+      end
+      
+      it 'should support calculated width' do
+        options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :height => "360"}
+        command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
+        ffmpeg = Ffmpeg.new(command, options)
+        ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 448x360 -y bar"
+      end
+      
+      # These appear unsupported..
+      # 
+      # it 'should support passthrough height' do
+      #   options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :width => "640"}
+      #   command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
+      #   ffmpeg = Ffmpeg.new(command, options)
+      #   ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x720 -y bar"        
+      # end
+      # 
+      # it 'should support passthrough width' do
+      #   options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :height => "360"}
+      #   command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
+      #   ffmpeg = Ffmpeg.new(command, options)
+      #   ffmpeg.command.should == "ffmpeg -i #{options[:input_file]} -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 1280x360 -y bar"        
+      # end
+    end
+    
     describe Ffmpeg, " when parsing a result" do
       before do
         setup_ffmpeg_spec
@@ -125,11 +178,11 @@ module RVideo
       it "should create correct result metadata" do
         @ffmpeg.send(:parse_result, @result).should be_true
         @ffmpeg.frame.should == '4126'
-        @ffmpeg.fps.should be_nil
+        @ffmpeg.output_fps.should be_nil
         @ffmpeg.q.should == '31.0'
         @ffmpeg.size.should == '5917kB'
         @ffmpeg.time.should == '69.1'
-        @ffmpeg.bitrate.should == '702.0kbits/s'
+        @ffmpeg.output_bitrate.should == '702.0kbits/s'
         @ffmpeg.video_size.should == "2417kB"
         @ffmpeg.audio_size.should == "540kB"
         @ffmpeg.header_size.should == "0kB"
@@ -140,11 +193,11 @@ module RVideo
       it "should create correct result metadata (2)" do
         @ffmpeg.send(:parse_result, @result2).should be_true
         @ffmpeg.frame.should == '584'
-        @ffmpeg.fps.should be_nil
+        @ffmpeg.output_fps.should be_nil
         @ffmpeg.q.should == '6.0'
         @ffmpeg.size.should == '708kB'
         @ffmpeg.time.should == '19.5'
-        @ffmpeg.bitrate.should == '297.8kbits/s'
+        @ffmpeg.output_bitrate.should == '297.8kbits/s'
         @ffmpeg.video_size.should == "49kB"
         @ffmpeg.audio_size.should == "153kB"
         @ffmpeg.header_size.should == "0kB"
@@ -155,11 +208,11 @@ module RVideo
       it "should create correct result metadata (3)" do
         @ffmpeg.send(:parse_result, @result3).should be_true
         @ffmpeg.frame.should == '273'
-        @ffmpeg.fps.should == "31"
+        @ffmpeg.output_fps.should == "31"
         @ffmpeg.q.should == '10.0'
         @ffmpeg.size.should == '398kB'
         @ffmpeg.time.should == '5.9'
-        @ffmpeg.bitrate.should == '551.8kbits/s'
+        @ffmpeg.output_bitrate.should == '551.8kbits/s'
         @ffmpeg.video_size.should == "284kB"
         @ffmpeg.audio_size.should == "92kB"
         @ffmpeg.header_size.should == "0kB"
@@ -170,11 +223,11 @@ module RVideo
       it "should create correct result metadata (4)" do
         @ffmpeg.send(:parse_result, @result4).should be_true
         @ffmpeg.frame.should be_nil
-        @ffmpeg.fps.should be_nil
+        @ffmpeg.output_fps.should be_nil
         @ffmpeg.q.should be_nil
         @ffmpeg.size.should == '1080kB'
         @ffmpeg.time.should == '69.1'
-        @ffmpeg.bitrate.should == '128.0kbits'
+        @ffmpeg.output_bitrate.should == '128.0kbits'
         @ffmpeg.video_size.should == "0kB"
         @ffmpeg.audio_size.should == "1080kB"
         @ffmpeg.header_size.should == "0kB"
@@ -192,6 +245,13 @@ module RVideo
       
       setup do
         setup_ffmpeg_spec
+      end
+      
+      specify "when codec not supported" do
+        result = "Unexpected result details (FFmpeg version SVN-r9102, Copyright (c) 2000-2007 Fabrice Bellard, et al. configuration: --prefix=/opt/local --prefix=/opt/local --disable-vhook --mandir=/opt/local/share/man --enable-shared --enable-pthreads --disable-mmx --enable-gpl --enable-libmp3lame --enable-libogg --enable-libvorbis --enable-libtheora --enable-libfaac --enable-libfaad --enable-xvid --enable-x264 --enable-liba52 libavutil version: 49.4.0 libavcodec version: 51.40.4 libavformat version: 51.12.1 built on Dec 20 2007 13:49:31, gcc: 4.0.1 (Apple Inc. build 5465) Seems stream 0 codec frame rate differs from container frame rate: 30000.00 (30000/1) -> 29.97 (30000/1001) Input #0, avi, from '/Users/swd/Sites/worker/tmp/22/1989-Onboard-Hungaroring-Piquet.avi': Duration: 00:01:37.3, start: 0.000000, bitrate: 1393 kb/s Stream #0.0: Video: mpeg4, yuv420p, 512x384, 29.97 fps(r) Stream #0.1: Audio: mp3, 24000 Hz, stereo, 40 kb/s Unknown codec 'amr_nb' )"
+        lambda {
+          @ffmpeg.send(:parse_result, result)
+        }.should raise_error(TranscoderError::InvalidFile, "Codec amr_nb not supported by this build of ffmpeg")
       end
       
       specify "when not passed a command" do
@@ -616,6 +676,26 @@ module RVideo
         }.should raise_error(TranscoderError::InvalidCommand, "Unable for find a suitable output format for 'foo'")
       end
       
+      specify "when the output file has no streams" do
+        result = "Unexpected result details (FFmpeg version SVN-r10656, Copyright (c) 2000-2007 Fabrice Bellard, et al.
+          configuration: --enable-libmp3lame --enable-libogg --enable-libvorbis --enable-liba52 --enable-libxvid --enable-libfaac --enable-libfaad --enable-libx264 --enable-libxvid --enable-pp --enable-shared --enable-gpl --enable-libtheora --enable-libfaadbin --enable-liba52bin --enable-libamr_nb --enable-libamr_wb --extra-ldflags=-L/usr/local/ffmpeg-src/ffmpeg/libavcodec/acfr16/ --extra-libs=-lacfr --enable-libacfr16
+          libavutil version: 49.5.0
+          libavcodec version: 51.44.0
+          libavformat version: 51.14.0
+          built on Oct 31 2007 00:58:48, gcc: 4.1.2 (Ubuntu 4.1.2-0ubuntu4)
+
+        Seems stream 0 codec frame rate differs from container frame rate: 1000.00 (1000/1) -> 30.00 (30/1)
+        Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/mnt/app/current/tmp/114/FlyIn1Comp.mov':
+          Duration: 00:00:08.3, start: 0.000000, bitrate: 2253 kb/s
+          Stream #0.0(eng): Video: mpeg4, yuv420p, 320x240, 30.00 fps(r)
+        Output file does not contain any stream
+        )"
+        lambda {
+          @ffmpeg.send(:parse_result, result)
+        }.should raise_error(TranscoderError, /Output file does not contain.*stream/)
+        
+      end
+      
       specify "when given a missing input file" do
         result = "FFmpeg version CVS, Copyright (c) 2000-2004 Fabrice Bellard
         Mac OSX universal build for ffmpegX
@@ -632,13 +712,9 @@ module RVideo
         }.should raise_error(TranscoderError::InvalidFile, /I\/O error: .+/)
       end
       
-      specify "when given a file it can't handle" do
-        puts "not tested"
-      end
+      specify "when given a file it can't handle"
       
-      specify "when cancelled halfway through" do
-        puts "not tested"
-      end
+      specify "when cancelled halfway through"
     
       specify "when receiving unexpected results" do
         result = "FFmpeg version CVS, Copyright (c) 2000-2004 Fabrice Bellard
@@ -664,6 +740,14 @@ module RVideo
         lambda {
           @ffmpeg.send(:parse_result, result)
         }.should raise_error(TranscoderError::UnexpectedResult, 'foo - bar')
+      end
+      
+      specify "with an unsupported codec" do
+        result = "FFmpeg version SVN-r9102, Copyright (c) 2000-2007 Fabrice Bellard, et al. configuration: --prefix=/opt/local --prefix=/opt/local --disable-vhook --mandir=/opt/local/share/man --enable-shared --enable-pthreads --disable-mmx --enable-gpl --enable-libmp3lame --enable-libogg --enable-libvorbis --enable-libtheora --enable-libfaac --enable-xvid --enable-x264 --enable-liba52 libavutil version: 49.4.0 libavcodec version: 51.40.4 libavformat version: 51.12.1 built on Dec 11 2007 12:00:30, gcc: 4.0.1 (Apple Inc. build 5465) Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/Users/jon/projects/rvideo/spec/files/kites.mp4': Duration: 00:00:19.6, start: 0.000000, bitrate: 98 kb/s Stream #0.0(und): Video: mpeg4, yuv420p, 176x144, 10.00 fps(r) Stream #0.1(und): Audio: samr / 0x726D6173, 8000 Hz, mono Output #0, flv, to '/Users/jon/projects/rvideo/tmp/kites.flv': Stream #0.0: Video: flv, yuv420p, 320x240, q=2-31, pass 1, 300 kb/s, 15.00 fps(c) Stream #0.1: Audio: mp3, 22050 Hz, stereo, 64 kb/s Stream mapping: Stream #0.0 -> #0.0 Stream #0.1 -> #0.1 Unsupported codec (id=73728) for input stream #0.1"
+        @ffmpeg.original = Inspector.new(:raw_response => files('kites2'))
+        lambda {
+          @ffmpeg.send(:parse_result, result)
+        }.should raise_error(TranscoderError::InvalidFile, /samr/)
       end
       
       specify "when a stream cannot be written" do
@@ -697,7 +781,7 @@ module RVideo
 end
 
 def setup_ffmpeg_spec
-  @options = {:input_file => "foo", :output_file => "bar", :resolution => "baz"}
-  @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -s $resolution$ -y $output_file$"  
+  @options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :width => "320", :height => "240"}
+  @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s $resolution$ -y $output_file$"  
   @ffmpeg = RVideo::Tools::Ffmpeg.new(@simple_avi, @options)
 end

@@ -50,12 +50,12 @@ module RVideo # :nodoc:
         raise ArgumentError, "Must supply either an input file or a pregenerated response" if options[:raw_response].nil? and file.nil?
       end
 
-      metadata = /(Input \#.*)\nMust/m.match(@raw_response)
+      metadata = /(Input \#.*)\n.+\n\Z/m.match(@raw_response)
       
       if /Unknown format/i.match(@raw_response) || metadata.nil?
         @unknown_format = true
       elsif /Duration: N\/A/im.match(@raw_response)
-#      elsif /Duration: N\/A|bitrate: N\/A/im.match(@raw_response)
+      # elsif /Duration: N\/A|bitrate: N\/A/im.match(@raw_response)
         @unreadable_file = true
         @raw_metadata = metadata[1] # in this case, we can at least still get the container type
       else

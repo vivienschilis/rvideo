@@ -1,9 +1,10 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 def setup_spec
-  @options = {:input_file => "foo", :output_file => "bar", :resolution => "baz"}
+  @options = {:output_file => "bar", :resolution => "baz"}
+  @input_file = spec_video "kites.mp4"
   @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -s $resolution$ -y $output_file$"
-  @transcoder = RVideo::Transcoder.new
+  @transcoder = RVideo::Transcoder.new(@input_file)
   @mock_original_file = mock(:original)
   @mock_original_file.stub!(:raw_response)
   RVideo::Inspector.stub!(:new).and_return(@mock_original_file)
@@ -11,7 +12,7 @@ end
 
 module RVideo
   
-  describe Transcoder, " when the execute method receives valid parameters" do
+  describe Transcoder, " execution" do
     before do
       setup_spec
       @transcoder.stub!(:check_integrity).and_return(true)
@@ -27,11 +28,34 @@ module RVideo
       @mock_ffmpeg = mock("ffmpeg")
       Tools::AbstractTool.stub!(:assign).and_return(@mock_ffmpeg)
       @mock_ffmpeg.should_receive(:execute)
+      @mock_ffmpeg.stub!(:original=)
       @transcoder.execute(@simple_avi, @options)
       @transcoder.executed_commands.size.should == 1
       @transcoder.executed_commands.first.should == @mock_ffmpeg
     end
     
+    it "should set original file" do
+      @mock_ffmpeg = mock("ffmpeg")
+      Tools::AbstractTool.stub!(:assign).and_return(@mock_ffmpeg)
+      @mock_ffmpeg.stub!(:execute)
+      @mock_ffmpeg.should_receive(:original=).with(@transcoder.original)
+      @transcoder.execute(@simple_avi, @options)
+    end
+    
+    # FIXME
+    # it "should raise an exception when trying to call a tool that doesn't exist" do
+    #   lambda {
+    #     @transcoder.send(:parse_and_execute, "foo -i bar", {})
+    #   }.should raise_error(TranscoderError::UnknownTool, /recipe tried to use the 'foo' tool/)
+    # end
+    
+    it "should raise an exception when the first argument is not a string" do
+      [String, 1, 1.0, true, nil, :foo].each do |obj|
+        lambda {
+          @transcoder.execute(obj, @options)
+        }.should raise_error(TranscoderError::ParameterError, /expected.*recipe.*string/i)      
+      end
+    end
   end
   
   describe Transcoder, " file integrity checks" do
@@ -41,14 +65,15 @@ module RVideo
       @transcoder.stub!(:parse_and_execute)
       @mock_processed_file = mock("processed")
       @mock_original_file.stub!(:duration).and_return 10
+      @mock_original_file.stub!(:invalid?).and_return false
       @mock_processed_file.stub!(:duration).and_return 10
       @mock_processed_file.stub!(:invalid?).and_return false
-      Inspector.should_receive(:new).once.with(:file => "foo").and_return(@mock_original_file)
+      #Inspector.should_receive(:new).once.with(:file => "foo").and_return(@mock_original_file)
       Inspector.should_receive(:new).once.with(:file => "bar").and_return(@mock_processed_file)
     end
 
     it "should call the inspector twice on a successful job, and should set @original and @processed" do
-      @transcoder.original.should be_nil
+      @transcoder.original.should_not be_nil
       @transcoder.processed.should be_nil
 
       @transcoder.execute(@simple_avi, @options)
@@ -79,16 +104,15 @@ module RVideo
   
   describe Transcoder, "#parse_and_execute" do
     before do
-      @options = {:input_file => "foo", :output_file => "bar", :resolution => "baz"}
-      @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -s $resolution$ -y $output_file$"
+      setup_spec
       @mock_tool = mock("tool")
       @mock_tool.stub!(:execute)
-      @transcoder = Transcoder.new
-      Inspector.stub!(:new)
+      @mock_tool.stub!(:original=)
+      @options_plus_input = @options.merge(:input_file => @input_file)
     end
     
     it "should assign a command via AbstractTool.assign, and pass the right options" do
-      Tools::AbstractTool.should_receive(:assign).with(@simple_avi, @options).and_return(@mock_tool)
+      Tools::AbstractTool.should_receive(:assign).with(@simple_avi, @options_plus_input).and_return(@mock_tool)
       @transcoder.send(:parse_and_execute, @simple_avi, @options)
     end
 
@@ -118,23 +142,4 @@ module RVideo
     end
   end
 
-  describe Transcoder, " when the execute method receives invalid parameters" do
-    before do
-      setup_spec
-    end
-    
-    it "should raise an exception when trying to call a tool that doesn't exist" do
-      lambda {
-        @transcoder.send(:parse_and_execute, "foo -i bar")
-      }.should raise_error(NameError, "uninitialized constant RVideo::Tools::Foo")
-    end
-    
-    it "should raise an exception when the first argument is not a string" do
-      [String, 1, 1.0, true, nil, :foo].each do |obj|
-        lambda {
-          @transcoder.execute(obj)
-        }.should raise_error(TranscoderError::UnknownError, /ArgumentError.*first/)      
-      end
-    end
-  end
 end

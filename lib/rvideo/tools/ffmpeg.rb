@@ -11,8 +11,9 @@ module RVideo
       end
       
       def format_fps(params={})
-        " -r #{params[:fps]}"
+        "-r #{params[:fps]}"
       end
+      
       def format_video_quality(params={})
         bitrate = params[:video_bit_rate].blank? ? nil : params[:video_bit_rate]
         factor = (params[:scale][:width].to_f * params[:scale][:height].to_f * params[:fps].to_f)
@@ -33,7 +34,7 @@ module RVideo
       
       
       def format_resolution(params={})
-        p = " -s #{params[:scale][:width]}x#{params[:scale][:height]} "
+        p = "-s #{params[:scale][:width]}x#{params[:scale][:height]}"
         if params[:letterbox]
           plr = ((params[:letterbox][:width] - params[:scale][:width]) / 2).to_i
           ptb = ((params[:letterbox][:height] - params[:scale][:height]) / 2).to_i

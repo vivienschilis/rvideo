@@ -129,7 +129,7 @@ module RVideo # :nodoc:
       commands = task.split("\n").compact
       commands.each do |c|
         tool = Tools::AbstractTool.assign(c, options)
-        tool.original = @original
+        tool.original = original
         tool.execute
         executed_commands << tool
       end
