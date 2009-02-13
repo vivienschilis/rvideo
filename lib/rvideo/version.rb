@@ -1,4 +1,4 @@
-module Rvideo #:nodoc:
+module RVideo #:nodoc:
   module VERSION #:nodoc:
     MAJOR = 0
     MINOR = 9
