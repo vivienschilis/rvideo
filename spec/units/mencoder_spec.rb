@@ -70,7 +70,7 @@ end
 
 def setup_mencoder_spec
   @options = {
-    :input_file => spec_video("kites.mp4"),
+    :input_file => spec_file("kites.mp4"),
     :output_file => "bar",
     :resolution => "copy"
   }

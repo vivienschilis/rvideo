@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 def setup_spec
   @options = {:output_file => "bar", :resolution => "baz"}
-  @input_file = spec_video "kites.mp4"
+  @input_file = spec_file "kites.mp4"
   @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -s $resolution$ -y $output_file$"
   @transcoder = RVideo::Transcoder.new(@input_file)
   @mock_original_file = mock(:original)

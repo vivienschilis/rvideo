@@ -24,7 +24,3 @@ require 'tools/yamdi'
 
 TEMP_PATH      = File.expand_path(File.dirname(__FILE__) + '/../tmp')
 REPORT_PATH    = File.expand_path(File.dirname(__FILE__) + '/../report')
-
-# TODO these only need to be defined for tests, should move out of here
-FIXTURE_PATH   = File.expand_path(File.dirname(__FILE__) + '/../spec/fixtures')
-TEST_FILE_PATH = File.expand_path(File.dirname(__FILE__) + '/../spec/files')

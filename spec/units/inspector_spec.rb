@@ -4,7 +4,7 @@ module RVideo
   describe Inspector do
     it "should raise an error if ffmpeg cannot be found" do
       lambda {
-        file = Inspector.new(:file => "#{TEST_FILE_PATH}/kites.mp4", :ffmpeg_binary => "ffmpeg-nonexistant")
+        file = Inspector.new(:file => spec_file("kites.mp4"), :ffmpeg_binary => "ffmpeg-nonexistant")
       }.should raise_error(RuntimeError, /^ffmpeg could not be found/)
     end
     

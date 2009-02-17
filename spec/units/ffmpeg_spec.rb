@@ -43,27 +43,27 @@ module RVideo
       end
       
       it 'should access the original fps (ffmpeg)' do
-        options = {:input_file => spec_video("kites.mp4"), :output_file => "bar" }
+        options = {:input_file => spec_file("kites.mp4"), :output_file => "bar" }
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame $original_fps$ -s 320x240 -y $output_file$", options)
         ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 10.00 -s 320x240 -y '#{options[:output_file]}'"
       end
       
       it 'should create width/height (ffmpeg)' do
-        options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :width => "640", :height => "360"}
+        options = {:input_file => spec_file("kites.mp4"), :output_file => "bar", :width => "640", :height => "360"}
         command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
         ffmpeg = Ffmpeg.new(command, options)
         ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x360 -y 'bar'"
       end
       
       it 'should support calculated height' do
-        options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :width => "640"}
+        options = {:input_file => spec_file("kites.mp4"), :output_file => "bar", :width => "640"}
         command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
         ffmpeg = Ffmpeg.new(command, options)
         ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x528 -y 'bar'"
       end
       
       it 'should support calculated width' do
-        options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :height => "360"}
+        options = {:input_file => spec_file("kites.mp4"), :output_file => "bar", :height => "360"}
         command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
         ffmpeg = Ffmpeg.new(command, options)
         ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 448x360 -y 'bar'"
@@ -72,14 +72,14 @@ module RVideo
       # These appear unsupported..
       # 
       # it 'should support passthrough height' do
-      #   options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :width => "640"}
+      #   options = {:input_file => spec_file("kites.mp4"), :output_file => "bar", :width => "640"}
       #   command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
       #   ffmpeg = Ffmpeg.new(command, options)
       #   ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x720 -y 'bar'"        
       # end
       # 
       # it 'should support passthrough width' do
-      #   options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :height => "360"}
+      #   options = {:input_file => spec_file("kites.mp4"), :output_file => "bar", :height => "360"}
       #   command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
       #   ffmpeg = Ffmpeg.new(command, options)
       #   ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 1280x360 -y 'bar'"        
@@ -781,7 +781,7 @@ module RVideo
 end
 
 def setup_ffmpeg_spec
-  @options = {:input_file => spec_video("kites.mp4"), :output_file => "bar", :width => "320", :height => "240"}
+  @options = {:input_file => spec_file("kites.mp4"), :output_file => "bar", :width => "320", :height => "240"}
   @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s $resolution$ -y $output_file$"  
   @ffmpeg = RVideo::Tools::Ffmpeg.new(@simple_avi, @options)
 end

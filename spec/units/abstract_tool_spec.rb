@@ -7,7 +7,7 @@ module RVideo
       before do
         @command = "ffmpeg -i $input_file$ $output_file$"
         @options = {
-          :input_file => spec_video("kites.mp4"), # "foo",
+          :input_file => spec_file("kites.mp4"), # "foo",
           :output_file => "bar"
         }
       end
@@ -32,7 +32,7 @@ module RVideo
       
       before do
         @options = {
-          :input_file => spec_video("kites.mp4"), #"foo",
+          :input_file => spec_file("kites.mp4"), #"foo",
           :output_file => "bar", :resolution => "copy"
         }
         @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -y $output_file$"  
@@ -64,7 +64,7 @@ module RVideo
       
       it "the matched_variable method should reference the variable without $" do
         ffmpeg = Ffmpeg.new(@simple_avi, @options)
-        ffmpeg.send(:matched_variable, "$input_file$").should == spec_video("kites.mp4")
+        ffmpeg.send(:matched_variable, "$input_file$").should == spec_file("kites.mp4")
       end
 
       it "the matched_variable method should raise an error when the variable is not found" do
