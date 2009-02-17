@@ -171,9 +171,9 @@ module RVideo # :nodoc:
       output_file ||= "#{TEMP_PATH}/#{File.basename(@full_filename, ".*")}-#{timecode.gsub("%","p")}.jpg"
       command = "ffmpeg -i #{@full_filename.shell_quoted} -ss #{t} -t 00:00:01 -r 1 -vframes 1 -f image2 #{output_file.shell_quoted}"
       
-      Transcoder.logger.info("\nCreating Screenshot: #{command}\n")
+      RVideo.logger.info("\nCreating Screenshot: #{command}\n")
       frame_result = `#{command} 2>&1`
-      Transcoder.logger.info("\nScreenshot results: #{frame_result}")
+      RVideo.logger.info("\nScreenshot results: #{frame_result}")
       
       output_file
     end

@@ -47,25 +47,6 @@ module RVideo # :nodoc:
     end
     
     #
-    # Configure logging. Pass a valid Ruby logger object.
-    #
-    #   logger = Logger.new(STDOUT)
-    #   RVideo::Transcoder.logger = logger
-    #
-    
-    def self.logger=(l)
-      @logger = l
-    end
-    
-    def self.logger
-      if @logger.nil?
-        @logger = Logger.new('/dev/null')
-      end
-      
-      @logger
-    end
-    
-    #
     # Requires a command and a hash of various interpolated options. The
     # command should be one or more lines of transcoder tool commands (e.g.
     # ffmpeg, flvtool2). Interpolate options by adding $option_key$ to the
@@ -90,17 +71,17 @@ module RVideo # :nodoc:
         @input_file = options[:input_file]
       end
       
-      Transcoder.logger.info("\nNew transcoder job\n================\nTask: #{task}\nOptions: #{options.inspect}")
+      RVideo.logger.info("\nNew transcoder job\n================\nTask: #{task}\nOptions: #{options.inspect}")
       parse_and_execute(task, options)      
       @processed = Inspector.new(:file => options[:output_file])
       result = check_integrity
-      Transcoder.logger.info("\nFinished task. Total errors: #{@errors.size}\n")
+      RVideo.logger.info("\nFinished task. Total errors: #{@errors.size}\n")
       @total_time = Time.now - t1
       result
     rescue TranscoderError => e
       raise e
     rescue Exception => e
-      Transcoder.logger.error("[ERROR] Unhandled RVideo exception: #{e.class} - #{e.message}\n#{e.backtrace}")
+      RVideo.logger.error("[ERROR] Unhandled RVideo exception: #{e.class} - #{e.message}\n#{e.backtrace}")
       raise TranscoderError::UnknownError, "Unexpected RVideo error: #{e.message} (#{e.class})"
     end
         

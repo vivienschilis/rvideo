@@ -119,7 +119,7 @@ module RVideo
           #create logfile
           log_file_name = underscoreize_file_basename(input_file) + "_" + recipe_name + ".log" 
           log_file = create_log_file(log_file_name)
-          RVideo::Transcoder.logger = Logger.new(log_file)
+          RVideo.logger = Logger.new(log_file)
 
           transcoder, errors = transcode(recipe, input_file, output_file)
           

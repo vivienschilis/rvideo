@@ -5,7 +5,7 @@ require File.dirname(__FILE__) + '/../lib/rvideo'
 FIXTURE_PATH   = File.expand_path(File.dirname(__FILE__) + '/../spec/fixtures')
 
 LOG_PATH = File.join(File.dirname(__FILE__), "spec.log")
-RVideo::Transcoder.logger = Logger.new LOG_PATH
+RVideo.logger = Logger.new LOG_PATH
 
 ###
 

@@ -14,8 +14,8 @@ module RVideo # :nodoc:
         # rescue NameError, /uninitialized constant/
           # raise TranscoderError::UnknownTool, "The recipe tried to use the '#{tool_name}' tool, which does not exist."
         rescue => e
-          Transcoder.logger.info $!
-          Transcoder.logger.info e.backtrace.join("\n")
+          RVideo.logger.info $!
+          RVideo.logger.info e.backtrace.join("\n")
         end
       end
       
@@ -37,19 +37,19 @@ module RVideo # :nodoc:
           log_temp_file_name = "/tmp/transcode_output_#{Time.now.to_i}.txt"
         
           final_command = "#{@command} 2>#{log_temp_file_name}"
-          Transcoder.logger.info("\nExecuting Command: #{final_command}\n")
+          RVideo.logger.info("\nExecuting Command: #{final_command}\n")
           `#{final_command}`
           
           populate_raw_result(log_temp_file_name)
           
-          Transcoder.logger.info("Result: \n#{@raw_result}")
+          RVideo.logger.info("Result: \n#{@raw_result}")
           parse_result(@raw_result)
           
           # Cleanup log file
           begin
             File.delete(log_temp_file_name)
           rescue Exception  => e
-            Transcoder.logger.error("Failed to delete output log file: #{log_temp_file_name}, e=#{e}")
+            RVideo.logger.error("Failed to delete output log file: #{log_temp_file_name}, e=#{e}")
           end
         end
         

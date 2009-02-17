@@ -24,3 +24,19 @@ require 'rvideo/tools/yamdi'
 
 TEMP_PATH   = File.expand_path(File.dirname(__FILE__) + '/../tmp')
 REPORT_PATH = File.expand_path(File.dirname(__FILE__) + '/../report')
+
+module RVideo
+  # Configure logging. Assumes that the logger object has an 
+  # interface similar to stdlib's Logger class.
+  #   
+  #   RVideo.logger = Logger.new(STDOUT)
+  #
+  def self.logger=(logger)
+    @logger = logger
+  end
+  
+  def self.logger
+    @logger = Logger.new("/dev/null") unless @logger
+    @logger
+  end
+end
