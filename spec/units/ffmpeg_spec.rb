@@ -48,7 +48,8 @@ module RVideo
       end
       
       it 'should access the original fps (ffmpeg)' do
-        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame $original_fps$ -s 320x240 -y $output_file$", @options)
+        @options.merge! :fps => "copy"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame $fps$ -s 320x240 -y $output_file$", @options)
         ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 10.00 -s 320x240 -y '#{@options[:output_file]}'"
       end
       

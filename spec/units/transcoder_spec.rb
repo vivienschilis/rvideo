@@ -1,18 +1,28 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
 def setup_spec
-  @options = {:output_file => "bar", :resolution => "baz"}
+  @options = {
+    :output_file => "bar",
+    :resolution => "baz"
+  }
+  
   @input_file = spec_file "kites.mp4"
-  @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -s $resolution$ -y $output_file$"
+  @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 $resolution$ -y $output_file$"
+  
   @transcoder = RVideo::Transcoder.new(@input_file)
+  @transcoder.stub! :do_execute
+  
   @mock_original_file = mock(:original)
   @mock_original_file.stub!(:raw_response)
   RVideo::Inspector.stub!(:new).and_return(@mock_original_file)
 end
 
+# TODO it would be nice if there was less mocking in here
+# also some of these tests are worthless, but anyway..
+
 module RVideo
   
-  describe Transcoder, " execution" do
+  describe Transcoder, "execution" do
     before do
       setup_spec
       @transcoder.stub!(:check_integrity).and_return(true)
@@ -58,7 +68,7 @@ module RVideo
     end
   end
   
-  describe Transcoder, " file integrity checks" do
+  describe Transcoder, "file integrity checks" do
 
     before do
       setup_spec
@@ -130,6 +140,7 @@ module RVideo
     it "should call five times with a five-line recipe" do
       five_line = "ffmpeg -i foo \n ffmpeg -i bar \n flvtool -i foo \n mp4box \n qt tools 8"
       Tools::AbstractTool.should_receive(:assign).exactly(5).and_return(@mock_tool)
+      @transcoder.stub!(:do_execute)
       @transcoder.send(:parse_and_execute, five_line, @options)
     end
     
