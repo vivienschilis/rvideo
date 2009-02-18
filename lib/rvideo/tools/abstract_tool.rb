@@ -14,6 +14,7 @@ module RVideo # :nodoc:
         rescue => e
           RVideo.logger.info e.message
           RVideo.logger.info e.backtrace.join("\n")
+          raise e
         end
       end
   
