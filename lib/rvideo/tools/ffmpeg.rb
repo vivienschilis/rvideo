@@ -177,17 +177,18 @@ module RVideo
         # Not sure why. Unit tests were succeeding, but hand tests weren't.
         if details =~ /video:/ 
           #success = /^frame=\s*(\S*)\s*q=(\S*).*L.*size=\s*(\S*)\s*time=\s*(\S*)\s*bitrate=\s*(\S*)\s*/m.match(details)
-          @frame = sanitary_match(/frame=\s*(\S*)/, details)
-          @output_fps = sanitary_match(/fps=\s*(\S*)/, details)
-          @q = sanitary_match(/\s+q=\s*(\S*)/, details)
-          @size = sanitary_match(/size=\s*(\S*)/, details)
-          @time = sanitary_match(/time=\s*(\S*)/, details)
-          @output_bitrate = sanitary_match(/bitrate=\s*(\S*)/, details)
+          @frame          = details[/frame=\s*(\S*)/, 1]
+          @output_fps     = details[/fps=\s*(\S*)/, 1]
+          @q              = details[/\s+q=\s*(\S*)/, 1]
+          @size           = details[/size=\s*(\S*)/, 1]
+          @time           = details[/time=\s*(\S*)/, 1]
+          @output_bitrate = details[/bitrate=\s*(\S*)/, 1]
           
-          @video_size = /video:\s*(\S*)/.match(details)[1]
-          @audio_size = /audio:\s*(\S*)/.match(details)[1]
-          @header_size = /headers:\s*(\S*)/.match(details)[1]
-          @overhead = /overhead[:]*\s*(\S*)/.match(details)[1]
+          @video_size     = details[/video:\s*(\S*)/, 1]
+          @audio_size     = details[/audio:\s*(\S*)/, 1]
+          @header_size    = details[/headers:\s*(\S*)/, 1]
+          @overhead       = details[/overhead[:]*\s*(\S*)/, 1]
+          
           psnr_match = /PSNR=(.*)\s*size=/.match(details)
           @psnr = psnr_match[1].strip if psnr_match
           return true
@@ -197,11 +198,6 @@ module RVideo
         #Could not write header for output file #0 (incorrect codec parameters ?)
         
         raise TranscoderError::UnexpectedResult, details
-      end
-
-      def sanitary_match(regexp, string)
-        match = regexp.match(string)
-        return match[1] if match
       end
       
     end

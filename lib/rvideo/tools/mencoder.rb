@@ -78,27 +78,24 @@ module RVideo
         
         video_details = result.match /Video stream:(.*)$/
         if video_details
-          @bitrate = sanitary_match(/Video stream:\s*([0-9.]*)/, video_details[0])
-          @video_size = sanitary_match(/size:\s*(\d*)\s*(\S*)/, video_details[0])
-          @time = sanitary_match(/bytes\s*([0-9.]*)/, video_details[0])
-          @frame = sanitary_match(/secs\s*(\d*)/, video_details[0])
+          @bitrate    = video_details[0][/Video stream:\s*([0-9.]*)/, 1]
+          @video_size = video_details[0][/size:\s*(\d*)\s*(\S*)/, 1]
+          @time       = video_details[0][/bytes\s*([0-9.]*)/, 1]
+          @frame      = video_details[0][/secs\s*(\d*)/, 1]
           @output_fps = (@frame.to_f / @time.to_f).round_to(3)
+        
         elsif result =~ /Video stream is mandatory/
-          raise TranscoderError::InvalidFile, "Video stream required, and no video stream found"
+          raise TranscoderError::InvalidFile,
+            "Video stream required, and no video stream found"
         end
         
         audio_details = result.match /Audio stream:(.*)$/
         if audio_details
-          @audio_size = sanitary_match(/size:\s*(\d*)\s*(\S*)/, audio_details[0])
+          @audio_size = audio_details[0][/size:\s*(\d*)\s*\S*/, 1]
         else
           @audio_size = 0
         end
         @size = (@video_size.to_i + @audio_size.to_i).to_s
-      end
-
-      def sanitary_match(regexp, string)
-        match = regexp.match(string)
-        return match[1] if match
       end
       
     end
