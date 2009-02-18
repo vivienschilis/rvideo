@@ -173,34 +173,28 @@ module RVideo
       end
       
       specify "when codec not supported" do
-        lambda {
-          @ffmpeg.send(:parse_result, ffmpeg_result(:amr_nb_not_supported))
-        }.should raise_error(TranscoderError::InvalidFile, "Codec amr_nb not supported by this build of ffmpeg")
+        parsing_result(:amr_nb_not_supported).
+          should raise_error(TranscoderError::InvalidFile, "Codec amr_nb not supported by this build of ffmpeg")
       end
       
       specify "when not passed a command" do
-        lambda {
-          @ffmpeg.send(:parse_result, ffmpeg_result(:missing_command))
-        }.should raise_error(TranscoderError::InvalidCommand, "must pass a command to ffmpeg")
+        parsing_result(:missing_command).
+          should raise_error(TranscoderError::InvalidCommand, "must pass a command to ffmpeg")
       end
       
       specify "when given a broken command" do
-        lambda { 
-          @ffmpeg.send(:parse_result, ffmpeg_result(:broken_command))
-        }.should raise_error(TranscoderError::InvalidCommand, "Unable for find a suitable output format for 'foo'")
+        parsing_result(:broken_command).
+          should raise_error(TranscoderError::InvalidCommand, "Unable for find a suitable output format for 'foo'")
       end
       
       specify "when the output file has no streams" do
-        lambda {
-          @ffmpeg.send(:parse_result, ffmpeg_result(:output_has_no_streams))
-        }.should raise_error(TranscoderError, /Output file does not contain.*stream/)
-        
+        parsing_result(:output_has_no_streams).
+          should raise_error(TranscoderError, /Output file does not contain.*stream/)
       end
       
       specify "when given a missing input file" do
-        lambda {
-          @ffmpeg.send(:parse_result, ffmpeg_result(:missing_input_file))
-        }.should raise_error(TranscoderError::InvalidFile, /I\/O error: .+/)
+        parsing_result(:missing_input_file).
+          should raise_error(TranscoderError::InvalidFile, /I\/O error: .+/)
       end
       
       specify "when given a file it can't handle"
@@ -208,22 +202,20 @@ module RVideo
       specify "when cancelled halfway through"
     
       specify "when receiving unexpected results" do
-        lambda {
-          @ffmpeg.send(:parse_result, ffmpeg_result(:unexpected_results))
-        }.should raise_error(TranscoderError::UnexpectedResult, 'foo - bar')
+        parsing_result(:unexpected_results).
+          should raise_error(TranscoderError::UnexpectedResult, 'foo - bar')
       end
       
       specify "with an unsupported codec" do
         @ffmpeg.original = Inspector.new(:raw_response => files('kites2'))
-        lambda {
-          @ffmpeg.send(:parse_result, ffmpeg_result(:unsupported_codec))
-        }.should raise_error(TranscoderError::InvalidFile, /samr/)
+        
+        parsing_result(:unsupported_codec).
+          should raise_error(TranscoderError::InvalidFile, /samr/)
       end
       
       specify "when a stream cannot be written" do
-        lambda {
-          @ffmpeg.send(:parse_result, ffmpeg_result(:unwritable_stream))
-        }.should raise_error(TranscoderError, /flv doesnt support.*incorrect codec/)
+        parsing_result(:unwritable_stream).
+          should raise_error(TranscoderError, /flv doesnt support.*incorrect codec/)
       end
       
     end
@@ -238,4 +230,8 @@ def setup_ffmpeg_spec
   }
   @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s $resolution$ -y $output_file$"  
   @ffmpeg = RVideo::Tools::Ffmpeg.new(@simple_avi, @options)
+end
+
+def parsing_result(result_fixture_key)
+  lambda { @ffmpeg.send(:parse_result, ffmpeg_result(result_fixture_key)) }
 end
