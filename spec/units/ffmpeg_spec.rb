@@ -35,6 +35,11 @@ module RVideo
     
     describe Ffmpeg, " magic variables" do
       before do
+        @options = {
+          :input_file => spec_file("kites.mp4"),
+          :output_file => "bar"
+        }
+        
         # mock_inspector = mock("inspector")
         # Inspector.stub!(:new).and_return(mock_inspector)
         # mock_inspector.stub!(:fps).and_return 23.98
@@ -43,30 +48,29 @@ module RVideo
       end
       
       it 'should access the original fps (ffmpeg)' do
-        options = {:input_file => spec_file("kites.mp4"), :output_file => "bar" }
-        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame $original_fps$ -s 320x240 -y $output_file$", options)
-        ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 10.00 -s 320x240 -y '#{options[:output_file]}'"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame $original_fps$ -s 320x240 -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 10.00 -s 320x240 -y '#{@options[:output_file]}'"
       end
       
       it 'should create width/height (ffmpeg)' do
-        options = {:input_file => spec_file("kites.mp4"), :output_file => "bar", :width => "640", :height => "360"}
+        @options.merge! :width => "640", :height => "360"
         command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
-        ffmpeg = Ffmpeg.new(command, options)
-        ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x360 -y 'bar'"
+        ffmpeg = Ffmpeg.new(command, @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x360 -y 'bar'"
       end
       
       it 'should support calculated height' do
-        options = {:input_file => spec_file("kites.mp4"), :output_file => "bar", :width => "640"}
+        @options.merge! :width => "640"
         command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
-        ffmpeg = Ffmpeg.new(command, options)
-        ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x528 -y 'bar'"
+        ffmpeg = Ffmpeg.new(command, @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x528 -y 'bar'"
       end
       
       it 'should support calculated width' do
-        options = {:input_file => spec_file("kites.mp4"), :output_file => "bar", :height => "360"}
+        @options.merge! :height => "360"
         command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
-        ffmpeg = Ffmpeg.new(command, options)
-        ffmpeg.command.should == "ffmpeg -i '#{options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 448x360 -y 'bar'"
+        ffmpeg = Ffmpeg.new(command, @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 448x360 -y 'bar'"
       end
       
       # These appear unsupported..
