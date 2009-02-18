@@ -337,7 +337,7 @@ module RVideo # :nodoc:
           variable_name = match.gsub("$","")
           if self.respond_to? variable_name
             self.send(variable_name)
-          elsif @options[variable_name] 
+          elsif @options.key?(variable_name) 
             @options[variable_name] || ""
           else
             raise TranscoderError::ParameterError,
