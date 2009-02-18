@@ -21,6 +21,14 @@ def recipes(key)
   load_fixture(:recipes)[key.to_s]
 end
 
+# The strip in here is important as the result parsing is apparently 
+# quite fussy about leading or trailing whitespace.
+def ffmpeg_result(key)
+  load_fixture(:ffmpeg_results)[key.to_s].strip
+end
+
+###
+
 def load_fixture(name)
   YAML.load_file("#{FIXTURE_PATH}/#{name}.yml")
 end
