@@ -33,7 +33,8 @@ module RVideo
       before do
         @options = {
           :input_file => spec_file("kites.mp4"), #"foo",
-          :output_file => "bar", :resolution => "copy"
+          :output_file => "bar",
+          :resolution => "copy"
         }
         @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec mp3 -r 29.97 -y $output_file$"  
       end
@@ -46,11 +47,11 @@ module RVideo
       end
       
       it "should work if options defined as strings, but referenced as symbols" do
-        options = {'input_file' => "foo", 'output_file' => "bar", 'resolution' => "copy"}
-        ffmpeg = Ffmpeg.new(@simple_avi, options)
-        ffmpeg.options[:resolution].should == options['resolution']
-        ffmpeg.options[:input_file].should == options['input_file']
-        ffmpeg.options[:output_file].should == options['output_file']
+        @options.stringify_keys!
+        ffmpeg = Ffmpeg.new(@simple_avi, @options)
+        ffmpeg.options[:resolution].should == @options['resolution']
+        ffmpeg.options[:input_file].should == @options['input_file']
+        ffmpeg.options[:output_file].should == @options['output_file']
       end
       
       it "should ignore extra options (not needed by the recipe)" do

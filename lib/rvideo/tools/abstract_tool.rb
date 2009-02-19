@@ -87,7 +87,7 @@ module RVideo # :nodoc:
         end
     
         ###
-        # FPS
+        # FPS aka framerate
     
         def fps
           format_fps(get_fps)
@@ -106,11 +106,11 @@ module RVideo # :nodoc:
     
         def get_original_fps
           return {} if @original.fps.nil?
-          {:fps => @original.fps}
+          { :fps => @original.fps }
         end
     
         def get_specific_fps
-          {:fps => @options['fps']}
+          { :fps => @options['fps'] }
         end
     
         ###
@@ -294,32 +294,35 @@ module RVideo # :nodoc:
         end
     
         def get_video_quality
-          inspect_original if @original.nil?
           quality = @options['video_quality'] || 'medium'
-          video_bit_rate = @options['video_bit_rate'] || nil
-          h = {:video_quality => quality, :video_bit_rate => video_bit_rate}
-          h.merge!(get_fps).merge!(get_resolution)
+          
+          { :video_quality => quality }.
+            merge!(get_fps).
+            merge!(get_resolution).
+            merge!(get_video_bit_rate)
         end
-    
-        # def get_video_quality
-        #   fps = @options['fps'] || @original.fps
-        #   raise TranscoderError::ParameterError, "could not find fps in order to determine video quality" if fps.nil?
-        #   width = @original.width
-        #   height = @
-        #   format_video_quality({:quality => @options['video_quality'], :bit_rate => @options['video_bit_rate']})
-        # end   
+        
+        def video_bit_rate
+          format_video_bit_rate(get_video_bit_rate)
+        end
+        
+        def get_video_bit_rate
+          { :video_bit_rate => @options["video_bit_rate"] }
+        end
 
       private
-    
+        
+        VARIABLE_INTERPOLATION_SCAN_PATTERN = /[^\\]\$[-_a-zA-Z]+\$/
+        
         def interpolate_variables(raw_command)
-          raw_command.scan(/[^\\]\$[-_a-zA-Z]+\$/).each do |match|
+          raw_command.scan(VARIABLE_INTERPOLATION_SCAN_PATTERN).each do |match|
             match = match[0..0] == "$" ? match : match[1..(match.size - 1)]
             match.strip!
             
             value = if ["$input_file$", "$output_file$"].include?(match)
-              matched_variable(match).shell_quoted
+              matched_variable(match).to_s.shell_quoted
             else
-              matched_variable(match)
+              matched_variable(match).to_s
             end
             
             raw_command.gsub!(match, value)
@@ -338,7 +341,7 @@ module RVideo # :nodoc:
           if self.respond_to? variable_name
             self.send(variable_name)
           elsif @options.key?(variable_name) 
-            @options[variable_name] || ""
+            @options[variable_name]
           else
             raise TranscoderError::ParameterError,
               "command is looking for the #{variable_name} parameter, but it was not provided. (Command: #{@raw_command})"

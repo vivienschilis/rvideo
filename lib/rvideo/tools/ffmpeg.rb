@@ -1,6 +1,12 @@
 module RVideo
   module Tools
     class Ffmpeg
+      # The flag used to set video bitrate has apparently changed between 
+      # different ffmpeg versions. In the latest builds -b is used. 
+      # In older builds it was -v which is now used to set verbosity of logging.
+      cattr_accessor :video_bit_rate_parameter
+      self.video_bit_rate_parameter = "b"
+      
       include AbstractTool::InstanceMethods
       
       attr_reader :frame, :q, :size, :time, :output_bitrate, :video_size, :audio_size, :header_size, :overhead, :psnr, :output_fps
@@ -14,21 +20,30 @@ module RVideo
         "-r #{params[:fps]}"
       end
       
+      def format_video_bit_rate(params = {})
+        "-#{video_bit_rate_parameter} #{params[:video_bit_rate]}k"
+      end
+      
       def format_video_quality(params={})
         bitrate = params[:video_bit_rate].blank? ? nil : params[:video_bit_rate]
-        factor = (params[:scale][:width].to_f * params[:scale][:height].to_f * params[:fps].to_f)
+        
+        params.merge! get_original_fps unless params[:fps]
+        
+        factor  = params[:scale][:width].to_f * params[:scale][:height].to_f * params[:fps].to_f
+        
         case params[:video_quality]
         when 'low'
           bitrate ||= (factor / 12000).to_i
-          " -v #{bitrate}k -crf 30 -me zero -subq 1 -refs 1 -threads auto "
+          params[:video_bit_rate] = bitrate
+          "#{format_video_bit_rate params} -crf 30 -me zero -subq 1 -refs 1 -threads auto"
         when 'medium'
           bitrate ||= (factor / 9000).to_i
-          " -v #{bitrate}k -crf 22 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me hex -subq 3 -trellis 1 -refs 2 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250"
+          params[:video_bit_rate] = bitrate
+          "#{format_video_bit_rate params} -crf 22 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me hex -subq 3 -trellis 1 -refs 2 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250"
         when 'high'
           bitrate ||= (factor / 3600).to_i
-          " -v #{bitrate}k -crf 18 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me full -subq 6 -trellis 1 -refs 3 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71"
-        else
-          ""
+          params[:video_bit_rate] = bitrate
+          "#{format_video_bit_rate params} -crf 18 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me full -subq 6 -trellis 1 -refs 3 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71"
         end
       end  
       
@@ -44,15 +59,15 @@ module RVideo
       end
 
       def format_audio_channels(params={})
-        " -ac #{params[:channels]}"
+        "-ac #{params[:channels]}"
       end
       
       def format_audio_bit_rate(params={})
-        " -ab #{params[:bit_rate]}k"
+        "-ab #{params[:bit_rate]}k"
       end
       
       def format_audio_sample_rate(params={})
-        " -ar #{params[:sample_rate]}"
+        "-ar #{params[:sample_rate]}"
       end
       
       

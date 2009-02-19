@@ -1,5 +1,19 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
+def setup_ffmpeg_spec
+  @options = {
+    :input_file => spec_file("kites.mp4"),
+    :output_file => "bar",
+    :width => "320", :height => "240"
+  }
+  @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
+  @ffmpeg = RVideo::Tools::Ffmpeg.new(@simple_avi, @options)
+end
+
+def parsing_result(result_fixture_key)
+  lambda { @ffmpeg.send(:parse_result, ffmpeg_result(result_fixture_key)) }
+end
+
 module RVideo
   module Tools
   
@@ -36,42 +50,92 @@ module RVideo
     describe Ffmpeg, " magic variables" do
       before do
         @options = {
-          :input_file => spec_file("kites.mp4"),
-          :output_file => "bar"
+          :input_file  => spec_file("boat.avi"),
+          :output_file => "test"
         }
-        
-        # mock_inspector = mock("inspector")
-        # Inspector.stub!(:new).and_return(mock_inspector)
-        # mock_inspector.stub!(:fps).and_return 23.98
-        # mock_inspector.stub!(:width).and_return 1280
-        # mock_inspector.stub!(:height).and_return 720
       end
       
-      it 'should access the original fps (ffmpeg)' do
+      it 'supports copying the originsl :fps' do
         @options.merge! :fps => "copy"
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame $fps$ -s 320x240 -y $output_file$", @options)
-        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 10.00 -s 320x240 -y '#{@options[:output_file]}'"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 15.10 -s 320x240 -y '#{@options[:output_file]}'"
       end
       
-      it 'should create width/height (ffmpeg)' do
+      it 'supports :width and :height options to build :resolution' do
         @options.merge! :width => "640", :height => "360"
-        command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
-        ffmpeg = Ffmpeg.new(command, @options)
-        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x360 -y 'bar'"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x360 -y '#{@options[:output_file]}'"
       end
       
-      it 'should support calculated height' do
+      it 'supports calculated :height' do
         @options.merge! :width => "640"
-        command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
-        ffmpeg = Ffmpeg.new(command, @options)
-        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x528 -y 'bar'"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 640x480 -y '#{@options[:output_file]}'"
       end
       
-      it 'should support calculated width' do
+      it 'supports calculated :width' do
         @options.merge! :height => "360"
-        command = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$"
-        ffmpeg = Ffmpeg.new(command, @options)
-        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 448x360 -y 'bar'"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s 480x360 -y '#{@options[:output_file]}'"
+      end
+      
+      ###
+      
+      it 'supports :video_bit_rate' do
+        @options.merge! :video_bit_rate => 666
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_bit_rate$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -b 666k -y '#{@options[:output_file]}'"
+      end
+      
+      it "supports :video_bit_rate and configurable command flag" do
+        Ffmpeg.video_bit_rate_parameter = "v"
+        @options.merge! :video_bit_rate => 666
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_bit_rate$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 666k -y '#{@options[:output_file]}'"
+      end
+      
+      ###
+      
+      # TODO for these video quality specs we might want to show that the expected
+      # bitrate is calculated based on dimensions and framerate so you can better 
+      # understand it without going to the source.
+      
+      it "supports :video_quality => 'low'" do
+        @options.merge! :video_quality => "low"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 96k -crf 30 -me zero -subq 1 -refs 1 -threads auto -y '#{@options[:output_file]}'"
+      end
+      
+      it "supports :video_quality => 'medium'" do
+        @options.merge! :video_quality => "medium"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 128k -crf 22 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me hex -subq 3 -trellis 1 -refs 2 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -y '#{@options[:output_file]}'"
+      end
+      
+      it "supports :video_quality => 'high'" do
+        @options.merge! :video_quality => "high"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 322k -crf 18 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me full -subq 6 -trellis 1 -refs 3 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71 -y '#{@options[:output_file]}'"
+      end
+      
+      ###
+      
+      it "supports :video_quality => 'low' with arbitrary :video_bit_rate" do
+        @options.merge! :video_quality => "low", :video_bit_rate => 666
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 666k -crf 30 -me zero -subq 1 -refs 1 -threads auto -y '#{@options[:output_file]}'"
+      end
+      
+      it "supports :video_quality => 'medium' with arbitrary :video_bit_rate" do
+        @options.merge! :video_quality => "medium", :video_bit_rate => 666
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 666k -crf 22 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me hex -subq 3 -trellis 1 -refs 2 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -y '#{@options[:output_file]}'"
+      end
+      
+      it "supports :video_quality => 'high' with arbitrary :video_bit_rate" do
+        @options.merge! :video_quality => "high", :video_bit_rate => 666
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 666k -crf 18 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me full -subq 6 -trellis 1 -refs 3 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71 -y '#{@options[:output_file]}'"
       end
       
       # These appear unsupported..
@@ -221,18 +285,4 @@ module RVideo
       
     end
   end
-end
-
-def setup_ffmpeg_spec
-  @options = {
-    :input_file => spec_file("kites.mp4"),
-    :output_file => "bar",
-    :width => "320", :height => "240"
-  }
-  @simple_avi = "ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -s $resolution$ -y $output_file$"  
-  @ffmpeg = RVideo::Tools::Ffmpeg.new(@simple_avi, @options)
-end
-
-def parsing_result(result_fixture_key)
-  lambda { @ffmpeg.send(:parse_result, ffmpeg_result(result_fixture_key)) }
 end
