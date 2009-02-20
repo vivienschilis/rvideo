@@ -38,8 +38,9 @@ module RVideo
       # The flag used to set video bitrate has apparently changed between 
       # different ffmpeg versions. In the latest builds -b is used. 
       # In older builds it was -v which is now used to set verbosity of logging.
+      DEFAULT_VIDEO_BIT_RATE_PARAMETER = "b"
       cattr_accessor :video_bit_rate_parameter
-      self.video_bit_rate_parameter = "b"
+      self.video_bit_rate_parameter = DEFAULT_VIDEO_BIT_RATE_PARAMETER
       
       include AbstractTool::InstanceMethods
       
@@ -60,6 +61,14 @@ module RVideo
       
       def format_video_bit_rate_tolerance(params = {})
         "-bt #{params[:video_bit_rate_tolerance]}k"
+      end
+      
+      def format_video_bit_rate_min(params = {})
+        "-minrate #{params[:video_bit_rate_min]}k"
+      end
+      
+      def format_video_bit_rate_max(params = {})
+        "-maxrate #{params[:video_bit_rate_max]}k"
       end
       
       def format_video_quality(params={})
@@ -83,8 +92,7 @@ module RVideo
           params[:video_bit_rate] = bitrate
           "#{format_video_bit_rate params} -crf 18 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me full -subq 6 -trellis 1 -refs 3 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71"
         end
-      end  
-      
+      end
       
       def format_resolution(params={})
         p = "-s #{params[:scale][:width]}x#{params[:scale][:height]}"

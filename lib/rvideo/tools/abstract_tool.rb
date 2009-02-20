@@ -26,13 +26,16 @@ module RVideo # :nodoc:
           names.map { |n| "format_#{n}" }.each do |name|
             class_eval %{
               def #{name}(params = {})
-                raise ParameterError, "The #{self.class} tool has not implemented the :#{name} method."
+                raise ParameterError,
+                  "The #{self.class} tool has not implemented the :#{name} method."
               end
             }, __FILE__, __LINE__
           end
         end
     
         abstract_attribute_formatter :resolution, :fps,
+          :video_bit_rate, :video_bit_rate_tolerance,
+          :video_bit_rate_min, :video_bit_rate_max,
           :audio_channels, :audio_bit_rate, :audio_sample_rate
     
         ###
@@ -316,6 +319,22 @@ module RVideo # :nodoc:
         
         def get_video_bit_rate_tolerance
           { :video_bit_rate_tolerance => @options["video_bit_rate_tolerance"] }
+        end
+        
+        def video_bit_rate_min
+          format_video_bit_rate_min(get_video_bit_rate_min)
+        end
+        
+        def get_video_bit_rate_min
+          { :video_bit_rate_min => @options["video_bit_rate_min"] }
+        end
+        
+        def video_bit_rate_max
+          format_video_bit_rate_max(get_video_bit_rate_max)
+        end
+        
+        def get_video_bit_rate_max
+          { :video_bit_rate_max => @options["video_bit_rate_max"] }
         end
 
       private

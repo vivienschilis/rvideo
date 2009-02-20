@@ -53,6 +53,8 @@ module RVideo
           :input_file  => spec_file("boat.avi"),
           :output_file => "test"
         }
+        
+        Ffmpeg.video_bit_rate_parameter = Ffmpeg::DEFAULT_VIDEO_BIT_RATE_PARAMETER
       end
       
       it 'supports copying the originsl :fps' do
@@ -104,6 +106,14 @@ module RVideo
       
       ###
       
+      it "supports :video_bit_rate_max and :video_bit_rate_min" do
+        @options.merge! :video_bit_rate => 666, :video_bit_rate_min => 666, :video_bit_rate_max => 666
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_bit_rate$ $video_bit_rate_min$ $video_bit_rate_max$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -b 666k -minrate 666k -maxrate 666k -y '#{@options[:output_file]}'"
+      end
+      
+      ###
+      
       # TODO for these video quality specs we might want to show that the expected
       # bitrate is calculated based on dimensions and framerate so you can better 
       # understand it without going to the source.
@@ -111,19 +121,19 @@ module RVideo
       it "supports :video_quality => 'low'" do
         @options.merge! :video_quality => "low"
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
-        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 96k -crf 30 -me zero -subq 1 -refs 1 -threads auto -y '#{@options[:output_file]}'"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -b 96k -crf 30 -me zero -subq 1 -refs 1 -threads auto -y '#{@options[:output_file]}'"
       end
       
       it "supports :video_quality => 'medium'" do
         @options.merge! :video_quality => "medium"
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
-        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 128k -crf 22 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me hex -subq 3 -trellis 1 -refs 2 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -y '#{@options[:output_file]}'"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -b 128k -crf 22 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me hex -subq 3 -trellis 1 -refs 2 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -y '#{@options[:output_file]}'"
       end
       
       it "supports :video_quality => 'high'" do
         @options.merge! :video_quality => "high"
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
-        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 322k -crf 18 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me full -subq 6 -trellis 1 -refs 3 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71 -y '#{@options[:output_file]}'"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -b 322k -crf 18 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me full -subq 6 -trellis 1 -refs 3 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71 -y '#{@options[:output_file]}'"
       end
       
       ###
@@ -131,19 +141,19 @@ module RVideo
       it "supports :video_quality => 'low' with arbitrary :video_bit_rate" do
         @options.merge! :video_quality => "low", :video_bit_rate => 666
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
-        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 666k -crf 30 -me zero -subq 1 -refs 1 -threads auto -y '#{@options[:output_file]}'"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -b 666k -crf 30 -me zero -subq 1 -refs 1 -threads auto -y '#{@options[:output_file]}'"
       end
       
       it "supports :video_quality => 'medium' with arbitrary :video_bit_rate" do
         @options.merge! :video_quality => "medium", :video_bit_rate => 666
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
-        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 666k -crf 22 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me hex -subq 3 -trellis 1 -refs 2 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -y '#{@options[:output_file]}'"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -b 666k -crf 22 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me hex -subq 3 -trellis 1 -refs 2 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -y '#{@options[:output_file]}'"
       end
       
       it "supports :video_quality => 'high' with arbitrary :video_bit_rate" do
         @options.merge! :video_quality => "high", :video_bit_rate => 666
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_quality$ -y $output_file$", @options)
-        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -v 666k -crf 18 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me full -subq 6 -trellis 1 -refs 3 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71 -y '#{@options[:output_file]}'"
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -b 666k -crf 18 -flags +loop -cmp +sad -partitions +parti4x4+partp8x8+partb8x8 -flags2 +mixed_refs -me full -subq 6 -trellis 1 -refs 3 -bf 3 -b_strategy 1 -coder 1 -me_range 16 -g 250 -keyint_min 25 -sc_threshold 40 -i_qfactor 0.71 -y '#{@options[:output_file]}'"
       end
       
       # These appear unsupported..
