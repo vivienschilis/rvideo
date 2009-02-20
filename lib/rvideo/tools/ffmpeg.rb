@@ -58,6 +58,10 @@ module RVideo
         "-#{video_bit_rate_parameter} #{params[:video_bit_rate]}k"
       end
       
+      def format_video_bit_rate_tolerance(params = {})
+        "-bt #{params[:video_bit_rate_tolerance]}k"
+      end
+      
       def format_video_quality(params={})
         bitrate = params[:video_bit_rate].blank? ? nil : params[:video_bit_rate]
         

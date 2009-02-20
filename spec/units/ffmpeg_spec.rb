@@ -96,6 +96,14 @@ module RVideo
       
       ###
       
+      it "supports :video_bit_rate_tolerance" do
+        @options.merge! :video_bit_rate_tolerance => 666
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_bit_rate_tolerance$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -bt 666k -y '#{@options[:output_file]}'"
+      end
+      
+      ###
+      
       # TODO for these video quality specs we might want to show that the expected
       # bitrate is calculated based on dimensions and framerate so you can better 
       # understand it without going to the source.

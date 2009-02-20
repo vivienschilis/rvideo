@@ -237,19 +237,19 @@ module RVideo # :nodoc:
         end
     
         def get_stereo_audio
-          {:channels => "2"}
+          { :channels => "2" }
         end
     
         def get_mono_audio
-          {:channels => "1"}
+          { :channels => "1" }
         end
     
         def get_specific_audio_bit_rate
-          {:bit_rate => @options['audio_bit_rate']}
+          { :bit_rate => @options['audio_bit_rate'] }
         end
     
         def get_specific_audio_sample_rate
-          {:sample_rate => @options['audio_sample_rate']}
+          { :sample_rate => @options['audio_sample_rate'] }
         end
     
         ###
@@ -308,6 +308,14 @@ module RVideo # :nodoc:
         
         def get_video_bit_rate
           { :video_bit_rate => @options["video_bit_rate"] }
+        end
+        
+        def video_bit_rate_tolerance
+          format_video_bit_rate_tolerance(get_video_bit_rate_tolerance)
+        end
+        
+        def get_video_bit_rate_tolerance
+          { :video_bit_rate_tolerance => @options["video_bit_rate_tolerance"] }
         end
 
       private
