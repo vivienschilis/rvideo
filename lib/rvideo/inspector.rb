@@ -84,11 +84,7 @@ module RVideo # :nodoc:
     #
       
     def valid?
-      if @unknown_format or @unreadable_file
-        false
-      else
-        true
-      end
+      not (@unknown_format or @unreadable_file)
     end
     
     #
@@ -96,7 +92,7 @@ module RVideo # :nodoc:
     #
     
     def invalid?
-      !valid?
+      not valid?
     end
     
     #
@@ -104,11 +100,7 @@ module RVideo # :nodoc:
     #
     
     def unknown_format?
-      if @unknown_format
-        true
-      else
-        false
-      end
+      @unknown_format ? true : false
     end
     
     #
@@ -116,11 +108,7 @@ module RVideo # :nodoc:
     #
     
     def unreadable_file?
-      if @unreadable_file
-        true
-      else
-        false
-      end
+      @unreadable_file ? true : false
     end
     
     #
@@ -128,11 +116,7 @@ module RVideo # :nodoc:
     #
     
     def audio?
-      if audio_match.nil?
-        false
-      else
-        true
-      end
+      not audio_match.nil?
     end
     
     #
@@ -140,17 +124,17 @@ module RVideo # :nodoc:
     #
     
     def video?
-      if video_match.nil?
-        false
-      else
-        true
-      end
+      not video_match.nil?
     end     
     
     #
-    # Take a screengrab of a movie. Requires an input file and a time parameter, and optionally takes an output filename. If no output filename is specfied, constructs one.
+    # Take a screengrab of a movie. Requires an input file and a time parameter, 
+    # and optionally takes an output filename. If no output filename is specfied, 
+    # constructs one.
     #
-    # Three types of time parameters are accepted - percentage (e.g. 3%), time in seconds (e.g. 60 seconds), and raw frame (e.g. 37). Will raise an exception if the time in seconds or the frame are out of the bounds of the input file.
+    # Three types of time parameters are accepted - percentage (e.g. 3%), time in 
+    # seconds (e.g. 60 seconds), and raw frame (e.g. 37). Will raise an exception if 
+    # the time in seconds or the frame are out of the bounds of the input file.
     #
     # Types:
     #   37s (37 seconds)
@@ -158,14 +142,14 @@ module RVideo # :nodoc:
     #   37% (37 percent)
     #   37  (default to seconds)
     #
-    # If a time is outside of the duration of the file, it will choose a frame at the 99% mark.
+    # If a time is outside of the duration of the file, it will choose a frame at the 
+    # 99% mark.
     #
     # Example:
     #
     #   t = RVideo::Transcoder.new('path/to/input_file.mp4')
     #   t.capture_frame('10%') # => '/path/to/screenshot/input-10p.jpg'
     #
-    
     def capture_frame(timecode, output_file = nil)
       t = calculate_time(timecode)
       output_file ||= "#{TEMP_PATH}/#{File.basename(@full_filename, ".*")}-#{timecode.gsub("%","p")}.jpg"
