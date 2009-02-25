@@ -255,6 +255,11 @@ module RVideo
         @results = load_fixture :ffmpeg_results
       end
       
+      specify "when a param is missing a value" do
+        parsing_result(:param_missing_value).
+          should raise_error(TranscoderError::InvalidCommand, /Expected .+ for .+ but found: .+/)
+      end
+      
       specify "when codec not supported" do
         parsing_result(:amr_nb_not_supported).
           should raise_error(TranscoderError::InvalidFile, "Codec amr_nb not supported by this build of ffmpeg")

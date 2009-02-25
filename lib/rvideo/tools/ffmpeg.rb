@@ -145,6 +145,9 @@ module RVideo
       end
       
       def parse_result(result)
+        if m = /Expected .+ for (.+) but found: (.+)/.match(result)
+          raise TranscoderError::InvalidCommand, m.to_s
+        end
         
         if m = /Unable for find a suitable output format for.*$/.match(result)
           raise TranscoderError::InvalidCommand, m[0]
