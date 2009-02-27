@@ -82,8 +82,18 @@ module RVideo
       file.raw_metadata.should =~ /^Input #/
     end
     
-    it "should handle '\n' newline characters" do
-      raw_response = "FFmpeg version SVN-r10656, Copyright (c) 2000-2007 Fabrice Bellard, et al.\n  configuration: --enable-libmp3lame --enable-libogg --enable-libvorbis --enable-liba52 --enable-libxvid --enable-libfaac --enable-libfaad --enable-libx264 --enable-libxvid --enable-pp --enable-shared --enable-gpl --enable-libtheora --enable-libfaadbin --enable-liba52bin --enable-libamr_nb --enable-libamr_wb --enable-libacfr16 --extra-ldflags=-L/root/src/ffmpeg/libavcodec/acfr16/ --extra-libs=-lacfr\n  libavutil version: 49.5.0\n  libavcodec version: 51.44.0\n  libavformat version: 51.14.0\n  built on Oct  9 2007 18:53:49, gcc: 4.1.2 (Ubuntu 4.1.2-0ubuntu4)\nInput #0, mp3, from '/mnt/app/worker/tmp/2112/2007-07-29_11AM.mp3':\n  Duration: 00:22:09.2, bitrate: 80 kb/s\n  Stream #0.0: Audio: mp3, 22050 Hz, stereo, 80 kb/s\nMust supply at least one output file\n"
+    it 'should handle "\n" newline characters' do
+      raw_response = "FFmpeg version SVN-r10656, Copyright (c) 2000-2007 Fabrice Bellard, et al.
+  configuration: --enable-libmp3lame --enable-libogg --enable-libvorbis --enable-liba52 --enable-libxvid --enable-libfaac --enable-libfaad --enable-libx264 --enable-libxvid --enable-pp --enable-shared --enable-gpl --enable-libtheora --enable-libfaadbin --enable-liba52bin --enable-libamr_nb --enable-libamr_wb --enable-libacfr16 --extra-ldflags=-L/root/src/ffmpeg/libavcodec/acfr16/ --extra-libs=-lacfr
+  libavutil version: 49.5.0
+  libavcodec version: 51.44.0
+  libavformat version: 51.14.0
+  built on Oct  9 2007 18:53:49, gcc: 4.1.2 (Ubuntu 4.1.2-0ubuntu4)
+Input #0, mp3, from '/mnt/app/worker/tmp/2112/2007-07-29_11AM.mp3':
+  Duration: 00:22:09.2, bitrate: 80 kb/s
+  Stream #0.0: Audio: mp3, 22050 Hz, stereo, 80 kb/s
+  Must supply at least one output file
+"
       
       file = Inspector.new(:raw_response => raw_response)
       file.ffmpeg_version.should == "SVN-r10656"

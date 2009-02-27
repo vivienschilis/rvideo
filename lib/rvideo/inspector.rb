@@ -319,8 +319,20 @@ module RVideo # :nodoc:
       bitrate_match[2]
     end
     
-    def audio_bit_rate # :nodoc:
-      nil
+    def bitrate_with_units
+      "#{bitrate} #{bitrate_units}"
+    end
+    
+    def audio_bit_rate
+      audio_match[7].to_i if audio?
+    end
+    
+    def audio_bit_rate_units
+      audio_match[8] if audio?
+    end
+    
+    def audio_bit_rate_with_units
+      "#{audio_bit_rate} #{audio_bit_rate_units}"
     end
     
     def audio_stream
@@ -367,10 +379,15 @@ module RVideo # :nodoc:
     #   "Hz"
     #
     
-    def audio_sample_units
+    def audio_sample_rate_units
       return nil unless audio?
       
       audio_match[4]
+    end
+    alias_method :audio_sample_units, :audio_sample_rate_units
+    
+    def audio_sample_rate_with_units
+      "#{audio_sample_rate} #{audio_sample_rate_units}"
     end
     
     #
@@ -399,6 +416,12 @@ module RVideo # :nodoc:
       else
         raise RuntimeError, "Unknown number of channels: #{audio_channels}"
       end
+    end
+    
+    # This should almost always return 16, 
+    # as the vast majority of audio is 16 bit.
+    def audio_sample_bit_depth
+      audio_match[6].to_i if audio?
     end
     
     # 
@@ -516,23 +539,44 @@ module RVideo # :nodoc:
     def bitrate_match
       /bitrate: ([0-9\.]+)\s*(.*)\s+/.match(@raw_metadata)
     end
-
+    
+    SEP = '(?:,\s*)?'
+    
+    AUDIO_MATCH_PATTERN = /
+      Stream\s+(.*?)[,:\(\[].*?\s*
+      Audio:\s+
+      ([^,]+)#{SEP}             # codec
+      ([0-9.]*)\s+(\w*)#{SEP} # sample rate
+      ([a-zA-Z:]*)#{SEP}      # channels
+      (?:s(\d+)#{SEP})?       # audio sample bit depth, not present in older builds
+      (?:(\d+)\s+(\S+))?      # audio bit rate, not present in some files
+    /x
+    
     def audio_match
       return nil unless valid?
       
-      /Stream\s*(.*?)[,|:|\(|\[].*?\s*Audio:\s*(.*?),\s*([0-9\.]*) (\w*),\s*([a-zA-Z:]*)/.match(audio_stream)
+      AUDIO_MATCH_PATTERN.match(audio_stream)
     end
-
+    
+    VIDEO_MATCH_PATTERN = /
+      Stream\s*(.*?)[,|:|\(|\[].*?\s*
+      Video:\s*(.*?),\s*
+      (.*?),\s*
+      (\d*)x(\d*)
+    /x
+    
+    APPLE_INTERMEDIATE_VIDEO_MATCH_PATTERN = /Stream\s*(.*?)[,|:|\(|\[].*?\s*Video:\s*(.*?),\s*(\d*)x(\d*)/
+    
     def video_match
       return nil unless valid?
       
-      match = /Stream\s*(.*?)[,|:|\(|\[].*?\s*Video:\s*(.*?),\s*(.*?),\s*(\d*)x(\d*)/.match(video_stream)
-
+      match = VIDEO_MATCH_PATTERN.match(video_stream)
+      
       # work-around for Apple Intermediate format, which does not have a color space
       # I fake up a match data object (yea, duck typing!) with an empty spot where
       # the color space would be.
       if match.nil?
-        match = /Stream\s*(.*?)[,|:|\(|\[].*?\s*Video:\s*(.*?),\s*(\d*)x(\d*)/.match(video_stream)
+        match = APPLE_INTERMEDIATE_VIDEO_MATCH_PATTERN.match(video_stream)
         match = [nil, match[1], match[2], nil, match[3], match[4]] unless match.nil?
       end
       

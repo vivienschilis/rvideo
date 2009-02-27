@@ -173,6 +173,10 @@ module RVideo
           raise TranscoderError::InvalidFile, m[0]
         end
         
+        if m = /[(\S+) @ \d+x\d+]error, (.+?)/.match(result)
+          raise TranscoderError::InvalidFile, "#{m[1]}: #{m[2]}"
+        end
+        
         if result =~ /usage: ffmpeg/
           raise TranscoderError::InvalidCommand, "must pass a command to ffmpeg"
         end

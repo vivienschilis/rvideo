@@ -1,5 +1,9 @@
 require File.dirname(__FILE__) + '/../lib/rvideo'
 
+# Because rspec's assertion style is a stupid, giant 
+# fucking waste of time. It's true!
+require 'spec/interop/test'
+
 ###
 
 FIXTURE_PATH   = File.expand_path(File.dirname(__FILE__) + '/../spec/fixtures')
