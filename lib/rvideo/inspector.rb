@@ -441,6 +441,16 @@ module RVideo # :nodoc:
       "#{width}x#{height}"
     end
     
+    def pixel_aspect_ratio
+      return nil unless video?
+      video_match[7]
+    end
+    
+    def display_aspect_ratio
+      return nil unless video?
+      video_match[8]
+    end
+    
     # The frame rate of the video in frames per second
     #
     # Example:
@@ -449,18 +459,18 @@ module RVideo # :nodoc:
     #
     def fps
       return nil unless video?
-      video_match[2] or video_match[7]
+      video_match[2] or video_match[9]
     end
     alias_method :framerate, :fps
     
     def time_base
       return nil unless video?
-      video_match[8]
+      video_match[10]
     end
     
     def codec_time_base
       return nil unless video?
-      video_match[9]
+      video_match[11]
     end
     
     private
@@ -496,16 +506,18 @@ module RVideo # :nodoc:
     FPS = 'fps(?:\(r\))?'
     
     VIDEO_MATCH_PATTERN = /
-      Stream\s*(\#[\d.]+)(?:[\(\[].+?[\)\]])?\s*  # stream id
-      [,:]\s*
-      (?:#{RATE}\s*#{FPS}[,:]\s*)?                # frame rate, older builds
-      Video:\s*
-      #{VAL}#{SEP}                                # codec
-      (?:#{VAL}#{SEP})?                           # color space
-      (\d+)x(\d+)#{SEP}?                           # resolution
-      (?:#{RATE}\s*(?:tbr|#{FPS})#{SEP}?)?         # frame rate
-      (?:#{RATE}\s*tbn#{SEP}?)?                    # time base
-      (?:#{RATE}\s*tbc#{SEP}?)?                    # codec time base
+      Stream\s*(\#[\d.]+)(?:[\(\[].+?[\)\]])?\s*                # stream id
+      [,:]\s*                                                   
+      (?:#{RATE}\s*#{FPS}[,:]\s*)?                              # frame rate, older builds
+      Video:\s*                                                 
+      #{VAL}#{SEP}                                              # codec
+      (?:#{VAL}#{SEP})?                                         # color space
+      (\d+)x(\d+)                                               # resolution
+        (?:\s*\[(?:PAR\s*(\d+:\d+))?\s*(?:DAR\s*(\d+:\d+))?\])? # pixel and display aspect ratios
+        #{SEP}?
+      (?:#{RATE}\s*(?:tbr|#{FPS})#{SEP}?)?                      # frame rate
+      (?:#{RATE}\s*tbn#{SEP}?)?                                 # time base
+      (?:#{RATE}\s*tbc#{SEP}?)?                                 # codec time base
     /x
     
     def video_match

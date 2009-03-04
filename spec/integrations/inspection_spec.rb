@@ -95,4 +95,18 @@ module RVideo
     #     Stream #0.0: Video: mjpeg, yuvj420p, 320x240, 15.10 tbr, 15.10 tbn, 15.10 tbc
     #     Stream #0.1: Audio: adpcm_ima_wav, 11025 Hz, mono, s16, 44 kb/s
   end
+  
+  describe Inspector, "with kites.mp4" do
+    setup do
+      @i = Inspector.new :file => spec_file("kites.mp4")
+    end
+    
+    it "knows the pixel aspect ratio" do
+      assert_equal "1:1", @i.pixel_aspect_ratio
+    end
+    
+    it "knows the display aspect ratio" do
+      assert_equal "11:9", @i.display_aspect_ratio
+    end
+  end
 end
