@@ -10,6 +10,7 @@ require 'active_support'
 
 # rvideo
 require 'rvideo/inspector'
+require 'rvideo/frame_capturer'
 require 'rvideo/errors'
 require 'rvideo/transcoder'
 require 'rvideo/tools/abstract_tool'
