@@ -1,3 +1,12 @@
+v0.9.6 IN PROGRESS, TODO: need more documentation of changes here, coming later..
+
+Major Enhancements:
+* Inspector#capture_frame behavior moved to new FrameCapturer class
+
+Minor Enhancements:
+* Inspector support for [VARIOUS NEW THINGS, TODO: itemize]
+
+
 v0.9.5 2008-09-09
 Note:
 * Moving hosting to GitHub.
@@ -24,15 +33,18 @@ v0.9.4 2007-12-12
 * One additional flvtool2 result: empty input file
 * Check that input file exists earlier in the transcoding process
 
+
 v0.9.3 2007-10-30
 
 One minor enhancement:
 * Reraise all unhandled RVideo exceptions as TranscoderErrors
 
+
 v0.9.2 2007-10-30
 
 One minor bug fix:
 * Correctly parse invalid files, where duration and bitrate are N/A, but start: 0.000 is included
+
 
 v0.9.1 2007-10-11
 
@@ -47,9 +59,11 @@ Two notes:
 * Tried and tested using open3 and open4 for command execution, but mencoder would unexpectedly hang with certain files when using these. Reverted these changes.
 * Mencoder has basic unit tests, but needs more tests. In particular, example output should be added for a variety of cases (especially failures and errors).
 
+
 v0.9.0 2007-09-27
 
 * Public RVideo release.
+
 
 v0.8.0 2007-09-27
 
