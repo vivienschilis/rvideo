@@ -392,6 +392,17 @@ module RVideo # :nodoc:
       video_match[8]
     end
     
+    # The portion of the overall bitrate the video is responsible for.
+    def video_bit_rate
+      return nil unless video?
+      video_match[9]
+    end
+    
+    def video_bit_rate_units
+      return nil unless video?
+      video_match[10]
+    end
+    
     # The frame rate of the video in frames per second
     #
     # Example:
@@ -400,18 +411,18 @@ module RVideo # :nodoc:
     #
     def fps
       return nil unless video?
-      video_match[2] or video_match[9]
+      video_match[2] or video_match[11]
     end
     alias_method :framerate, :fps
     
     def time_base
       return nil unless video?
-      video_match[10]
+      video_match[12]
     end
     
     def codec_time_base
       return nil unless video?
-      video_match[11]
+      video_match[13]
     end
     
     private
@@ -427,16 +438,16 @@ module RVideo # :nodoc:
     SEP = '(?:,\s*)'
     VAL = '([^,]+)'
     
-    RATE = '([\d.]+)'
+    RATE = '([\d.]+k?)'
     
     AUDIO_MATCH_PATTERN = /
       Stream\s+(.*?)[,:\(\[].*?\s*
       Audio:\s+
-      #{VAL}#{SEP}          # codec
+      #{VAL}#{SEP}           # codec
       #{RATE}\s+(\w*)#{SEP}? # sample rate
       ([a-zA-Z:]*)#{SEP}?    # channels
       (?:s(\d+)#{SEP}?)?     # audio sample bit depth
-      (?:(\d+)\s+(\S+))?    # audio bit rate
+      (?:(\d+)\s+(\S+))?     # audio bit rate
     /x
     
     def audio_match
@@ -456,6 +467,7 @@ module RVideo # :nodoc:
       (\d+)x(\d+)                                               # resolution
         (?:\s*\[(?:PAR\s*(\d+:\d+))?\s*(?:DAR\s*(\d+:\d+))?\])? # pixel and display aspect ratios
         #{SEP}?
+      (?:#{RATE}\s*(kb\/s)#{SEP}?)?                             # video bit rate
       (?:#{RATE}\s*(?:tbr|#{FPS})#{SEP}?)?                      # frame rate
       (?:#{RATE}\s*tbn#{SEP}?)?                                 # time base
       (?:#{RATE}\s*tbc#{SEP}?)?                                 # codec time base
