@@ -34,6 +34,8 @@ Echoe.new NAME do |p|
   p.runtime_dependencies     = ["activesupport"]
   p.development_dependencies = ["rspec"]
   
+  p.ignore_pattern = ["website/**/*"]
+  
   p.rdoc_options = [
     "--quiet",
     "--title", "rvideo documentation",
