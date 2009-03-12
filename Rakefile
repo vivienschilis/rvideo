@@ -9,6 +9,7 @@ require File.join(__HERE__, 'lib', 'rvideo')
 ###
 
 AUTHOR = [
+  "Peter Boling",
   "Jonathan Dahl (Slantwise Design)",
   "Seth Thomas Rasmussen"
 ]
