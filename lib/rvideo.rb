@@ -22,6 +22,7 @@ require 'rvideo/tools/mplayer'
 require 'rvideo/tools/mp4creator'
 require 'rvideo/tools/ffmpeg2theora'
 require 'rvideo/tools/yamdi'
+require 'rvideo/tools/qtfaststart'
 
 TEMP_PATH   = File.expand_path(File.dirname(__FILE__) + '/../tmp')
 REPORT_PATH = File.expand_path(File.dirname(__FILE__) + '/../report')

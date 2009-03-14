@@ -8,7 +8,7 @@ module RVideo # :nodoc:
       def self.assign(cmd, options = {})
         tool_name = cmd.split(" ").first
         begin
-          tool = "RVideo::Tools::#{tool_name.classify}".constantize.send(:new, cmd, options)
+          tool = "RVideo::Tools::#{tool_name.underscore.classify}".constantize.send(:new, cmd, options)
         # rescue NameError, /uninitialized constant/
           # raise TranscoderError::UnknownTool, "The recipe tried to use the '#{tool_name}' tool, which does not exist."
         rescue => e
