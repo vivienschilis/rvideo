@@ -21,6 +21,7 @@ lib/rvideo/tools/mp4box.rb
 lib/rvideo/tools/mp4creator.rb
 lib/rvideo/tools/mplayer.rb
 lib/rvideo/tools/yamdi.rb
+lib/rvideo/tools/qtfaststart.rb
 lib/rvideo/transcoder.rb
 lib/rvideo/version.rb
 lib/rvideo.rb
@@ -33,12 +34,7 @@ rvideo.gemspec
 scripts/txt2html
 setup.rb
 spec/files/boat.avi
-spec/files/dinner.3g2
-spec/files/foo $ bar & baz
-spec/files/hats.3gp
 spec/files/kites.mp4
-spec/files/quads.wmv
-spec/files/sword.3gp
 spec/fixtures/ffmpeg_builds.yml
 spec/fixtures/ffmpeg_results.yml
 spec/fixtures/files.yml
