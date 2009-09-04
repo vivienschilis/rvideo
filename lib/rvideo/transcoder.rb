@@ -65,6 +65,8 @@ module RVideo # :nodoc:
     #
     
     def execute(task, options = {})
+      options[:progress] ||= false
+      
       t1 = Time.now
       
       if @input_file.nil?
@@ -72,7 +74,15 @@ module RVideo # :nodoc:
       end
       
       RVideo.logger.info("\nNew transcoder job\n================\nTask: #{task}\nOptions: #{options.inspect}")
-      parse_and_execute(task, options)      
+
+      if options[:progress]
+        parse_and_execute(task, options) do |progress|
+          yield progress
+        end
+      else
+        parse_and_execute(task, options)
+      end
+
       @processed = Inspector.new(:file => options[:output_file])
       result = check_integrity
       RVideo.logger.info("\nFinished task. Total errors: #{@errors.size}\n")
@@ -112,7 +122,16 @@ module RVideo # :nodoc:
       commands.each do |c|
         tool = Tools::AbstractTool.assign(c, options)
         tool.original = original
-        tool.execute
+        
+        if options[:progress] and tool.respond_to?(:parse_progress) # We can only report progress if the tool supports it
+          tool.execute do |progress|
+            # Pass the tool name back with the progress so if multiple tools give back progress we can tell them apart
+            yield [tool.tool_command, progress]
+          end
+        else
+          tool.execute
+        end
+        
         executed_commands << tool
       end
     end

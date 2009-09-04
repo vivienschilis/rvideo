@@ -40,7 +40,7 @@ module RVideo # :nodoc:
     
         ###
     
-        attr_reader :options, :command, :raw_result
+        attr_reader :options, :command, :raw_result, :progress
         attr_writer :original
     
         def initialize(raw_command, options = {})
@@ -51,15 +51,35 @@ module RVideo # :nodoc:
 
         def execute
           @output_params = {}
-      
-          # Dump the log output into a temp file
-          log_temp_file_name = "/tmp/transcode_output_#{Time.now.to_i}.txt"
-    
-          final_command = "#{@command} 2>#{log_temp_file_name}"
           RVideo.logger.info("\nExecuting Command: #{final_command}\n")
-          do_execute final_command
-      
-          populate_raw_result(log_temp_file_name)
+          
+          # Progress reporting
+          if block_given?
+            final_command = "#{@command} 2>&1"
+            @raw_result = ''
+            duration = 0
+            previous_line = nil
+            IO.popen(final_command) do |pipe|
+              # pipe.each("\r") do |line|
+                if line != previous_line
+                  # previous_line = line
+                  @progress, duration = parse_progress(line, duration)
+                  yield @progress
+                  $defout.flush
+                # end
+                # WARNING: we may need to set a limit to how many lines are appended to @raw_result as ffmpeg can spit out a massive amount of info if things go pear shaped
+                @raw_result += line + "\r" 
+              end
+            end
+          else
+            # Dump the log output into a temp file
+            log_temp_file_name = "/tmp/transcode_output_#{Time.now.to_i}.txt"
+
+            final_command = "#{@command} 2>#{log_temp_file_name}"
+            
+            do_execute final_command
+            populate_raw_result(log_temp_file_name)
+          end
       
           RVideo.logger.info("Result: \n#{@raw_result}")
           parse_result(@raw_result)
