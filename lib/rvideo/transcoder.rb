@@ -123,7 +123,7 @@ module RVideo # :nodoc:
         tool = Tools::AbstractTool.assign(c, options)
         tool.original = original
         
-        if options[:progress] and tool.respond_to?(:parse_progress) # We can only report progress if the tool supports it
+        if options[:progress]# and tool.respond_to?(:parse_progress) # We can only report progress if the tool supports it
           tool.execute do |progress|
             # Pass the tool name back with the progress so if multiple tools give back progress we can tell them apart
             yield [tool.tool_command, progress]

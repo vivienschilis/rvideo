@@ -51,17 +51,17 @@ module RVideo # :nodoc:
 
         def execute
           @output_params = {}
-          RVideo.logger.info("\nExecuting Command: #{final_command}\n")
           
           # Progress reporting
           if block_given?
             final_command = "#{@command} 2>&1"
+            RVideo.logger.info("\nExecuting Command: #{final_command}\n")
             @raw_result = ''
             duration = 0
             previous_line = nil
             IO.popen(final_command) do |pipe|
-              # pipe.each("\r") do |line|
-                if line != previous_line
+              pipe.each("\r") do |line|
+                # if line != previous_line
                   # previous_line = line
                   @progress, duration = parse_progress(line, duration)
                   yield @progress
@@ -76,6 +76,7 @@ module RVideo # :nodoc:
             log_temp_file_name = "/tmp/transcode_output_#{Time.now.to_i}.txt"
 
             final_command = "#{@command} 2>#{log_temp_file_name}"
+            RVideo.logger.info("\nExecuting Command: #{final_command}\n")
             
             do_execute final_command
             populate_raw_result(log_temp_file_name)
