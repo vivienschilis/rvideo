@@ -59,18 +59,73 @@ module RVideo # :nodoc:
             @raw_result = ''
             duration = 0
             previous_line = nil
-            IO.popen(final_command) do |pipe|
-              pipe.each("\r") do |line|
-                # if line != previous_line
-                  # previous_line = line
-                  @progress, duration = parse_progress(line, duration)
-                  yield @progress
-                  $defout.flush
-                # end
-                # WARNING: we may need to set a limit to how many lines are appended to @raw_result as ffmpeg can spit out a massive amount of info if things go pear shaped
-                @raw_result += line + "\r" 
+            
+            progress_update_count = 0
+            command_pid = nil
+            
+            mutex = Mutex.new
+            
+            command_thread = Thread.new do 
+              IO.popen(final_command) do |pipe|
+
+                pipe.each("\r") do |line|
+                  if line != previous_line
+                    previous_line = line
+                    new_progress, duration = parse_progress(line, duration)
+                    # puts "N"+new_progress
+                    # unless new_progress.nil?
+                      mutex.synchronize do
+                        @progress = new_progress
+                        progress_update_count += 1
+                      end
+                    # end
+                    # progress_updates << new_progress
+                    $defout.flush
+                  end
+                  # WARNING: we may need to set a limit to how many lines are appended to @raw_result as ffmpeg can spit out a massive amount of info if things go pear shaped
+                  @raw_result += line + "\r" 
+                end
               end
             end
+                            puts command_pid
+            # Yield the progress and monitor the process
+            sample_rate = 0.5
+            process_timeout = 3 # If the process doesn't report a progress update after 60 seconds we will assumed its stalled and kill it
+
+            current_timeout = 0
+            progress_to_yeild = nil
+            current_progress_update_count = nil
+            previous_progress_update_count = nil
+            
+            
+            loop do
+              # Exit when the command is done
+              break unless command_thread.alive?
+              
+              # Yield the progress
+              mutex.synchronize do
+                # First check if we're actually making progress! We should kill the command if it's not, as it's probably because ffmpeg has frozen
+                
+                progress_to_yeild = @progress
+                current_progress_update_count = progress_update_count
+              end
+              
+              puts "#{current_progress_update_count}|#{previous_progress_update_count}"
+              if current_progress_update_count == previous_progress_update_count
+                current_timeout += sample_rate
+              end
+              
+              previous_progress_update_count = current_progress_update_count
+              
+              if current_timeout >= process_timeout
+                puts "KILL FFMPEG #{command_pid}"
+              end
+              yield progress_to_yeild
+              
+              sleep sample_rate
+            end
+            
+            
           else
             # Dump the log output into a temp file
             log_temp_file_name = "/tmp/transcode_output_#{Time.now.to_i}.txt"
