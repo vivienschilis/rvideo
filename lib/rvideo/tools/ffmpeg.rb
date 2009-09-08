@@ -120,8 +120,80 @@ module RVideo
         "-ar #{params[:sample_rate]}"
       end
       
+      def execute_with_progress
+        final_command = @command
+        puts final_command
+        RVideo.logger.info("\nExecuting Command: #{final_command}\n")
+        @raw_result = ''
+        duration = 0
+        previous_line = nil
+        
+        progress_update_count = 0
+        command_pid = nil
+        
+        mutex = Mutex.new
+        
+        command_thread = Thread.new do 
+          command_pid, stdin, stdout, stderr = Open4::popen4(final_command)
+          stderr.each("\r") do |line|
+            if line != previous_line
+              previous_line = line
+              new_progress, duration = parse_progress(line, duration)
+              # puts "N"+new_progress
+              # unless new_progress.nil?
+                mutex.synchronize do
+                  @progress = new_progress
+                  progress_update_count += 1
+                end
+              # end
+              # progress_updates << new_progress
+              $defout.flush
+            end
+            # WARNING: we may need to set a limit to how many lines are appended to @raw_result as ffmpeg can spit out a massive amount of info if things go pear shaped
+            @raw_result += line + "\r"
+          end
+        end
+        
+        puts "command_pid: #{command_pid}"
+        # Yield the progress and monitor the process
+        sample_rate = 0.5
+        process_timeout = 3 # If the process doesn't report a progress update after 60 seconds we will assumed its stalled and kill it
+
+        current_timeout = 0
+        progress_to_yeild = nil
+        current_progress_update_count = nil
+        previous_progress_update_count = nil
+        
+        loop do
+          # Exit when the command is done
+          break unless command_thread.alive?
+          
+          # Yield the progress
+          mutex.synchronize do
+            # First check if we're actually making progress! We should kill the command if it's not, as it's probably because ffmpeg has frozen
+            
+            progress_to_yeild = @progress
+            current_progress_update_count = progress_update_count
+          end
+          
+          puts "#{current_progress_update_count}|#{previous_progress_update_count}"
+          if current_progress_update_count == previous_progress_update_count
+            current_timeout += sample_rate
+          end
+          
+          previous_progress_update_count = current_progress_update_count
+          
+          if current_timeout >= process_timeout
+            puts "KILL FFMPEG #{command_pid}"
+            Process.kill("SIGKILL", command_pid)
+          end
+          yield progress_to_yeild
+          
+          sleep sample_rate
+        end
+      end
       
-      private
+private
       
       def parse_progress(line, duration)
         if line =~ /Duration: (\d{2}):(\d{2}):(\d{2}).(\d{1})/
