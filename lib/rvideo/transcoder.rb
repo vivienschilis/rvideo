@@ -120,7 +120,7 @@ module RVideo # :nodoc:
         tool.original = original
         
         tool.execute do |progress|
-          yield [tool, progress]
+          yield({:tool => tool, :progress => progress})
         end
         
         executed_commands << tool

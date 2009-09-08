@@ -69,6 +69,21 @@ will populate an errors array if the duration of the processed video
 differs from the duration of the original video, or if the processed
 file is unreadable.
 
+== Monitoring ffmpeg encoding progress
+
+Damien Tanner has ported across Jonathan Conway's work on reporting progress on ffmpeg. If you pass a block to your execute it will yield the encoding progress:
+
+  transcoder.execute(recipe, {:input_file => "/path/to/input.mp4",
+    :output_file => "/path/to/output.flv", :resolution => "640x360"}) do |progress|
+    puts "#{progress[:tool].tool_command}: #{progress[:progress]}%"
+  end
+
+Progress is only reported for the ffmpeg tool at present, in future hopefully we'll see support extended for more tools.
+
+There is also support for killing hung ffmpeg processes. We found that sometimes a bad file can cause ffmpeg to just stop processing but still sit there using 100% cpu. When monitoring the progress we spawn it off in a separate thread, and then monitor the progress in the main thread. If the ffmpeg process times out by not reporting progress for a specified amount of time, we kill it.
+
+==
+
 Thanks to Peter Boling for early work on RVideo.
 
 Contribute to RVideo! If you want to help out, there are a few things you can 

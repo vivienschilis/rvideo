@@ -57,7 +57,6 @@ module RVideo # :nodoc:
               yield progress
             end
           else
-            raise DIE
             # Dump the log output into a temp file
             log_temp_file_name = "/tmp/transcode_output_#{Time.now.to_i}.txt"
 

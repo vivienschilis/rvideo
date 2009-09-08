@@ -44,7 +44,7 @@ module RVideo
       
       include AbstractTool::InstanceMethods
       
-      attr_reader :frame, :q, :size, :time, :output_bitrate, :video_size, :audio_size, :header_size, :overhead, :psnr, :output_fps
+      attr_reader :frame, :q, :size, :time, :output_bitrate, :video_size, :audio_size, :header_size, :overhead, :psnr, :output_fps, :pid
       
       # Not sure if this is needed anymore...
       def tool_command
@@ -121,32 +121,23 @@ module RVideo
       end
       
       def execute_with_progress
+        # TODO put progress_counter stuff back in because long videos might not update their progress for some time and we wouldn't want to accidently kill them!
         final_command = @command
-        puts final_command
         RVideo.logger.info("\nExecuting Command: #{final_command}\n")
         @raw_result = ''
         duration = 0
         previous_line = nil
-        
-        progress_update_count = 0
-        command_pid = nil
-        
         mutex = Mutex.new
         
         command_thread = Thread.new do 
-          command_pid, stdin, stdout, stderr = Open4::popen4(final_command)
+          @pid, stdin, stdout, stderr = Open4::popen4(final_command)
           stderr.each("\r") do |line|
             if line != previous_line
               previous_line = line
               new_progress, duration = parse_progress(line, duration)
-              # puts "N"+new_progress
-              # unless new_progress.nil?
                 mutex.synchronize do
                   @progress = new_progress
-                  progress_update_count += 1
                 end
-              # end
-              # progress_updates << new_progress
               $defout.flush
             end
             # WARNING: we may need to set a limit to how many lines are appended to @raw_result as ffmpeg can spit out a massive amount of info if things go pear shaped
@@ -154,43 +145,33 @@ module RVideo
           end
         end
         
-        puts "command_pid: #{command_pid}"
         # Yield the progress and monitor the process
         sample_rate = 0.5
-        process_timeout = 3 # If the process doesn't report a progress update after 60 seconds we will assumed its stalled and kill it
-
+        process_timeout = 60 # If the process doesn't report a progress update after 60 seconds we will assumed its stalled and kill it
         current_timeout = 0
         progress_to_yeild = nil
-        current_progress_update_count = nil
-        previous_progress_update_count = nil
         
         loop do
           # Exit when the command is done
           break unless command_thread.alive?
-          
           # Yield the progress
           mutex.synchronize do
             # First check if we're actually making progress! We should kill the command if it's not, as it's probably because ffmpeg has frozen
-            
+            if progress_to_yeild == @progress
+              current_timeout += sample_rate
+            end
             progress_to_yeild = @progress
-            current_progress_update_count = progress_update_count
           end
           
-          puts "#{current_progress_update_count}|#{previous_progress_update_count}"
-          if current_progress_update_count == previous_progress_update_count
-            current_timeout += sample_rate
-          end
-          
-          previous_progress_update_count = current_progress_update_count
-          
-          if current_timeout >= process_timeout
-            puts "KILL FFMPEG #{command_pid}"
-            Process.kill("SIGKILL", command_pid)
-          end
+          self.kill if current_timeout >= process_timeout
           yield progress_to_yeild
-          
           sleep sample_rate
         end
+      end
+      
+      def kill
+        Process.kill("SIGKILL", @pid)
+        raise TranscoderError, "Transcoder hung."
       end
       
 private
