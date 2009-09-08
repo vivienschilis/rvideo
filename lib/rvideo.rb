@@ -7,6 +7,7 @@ require 'rvideo/string'
 # gems
 require 'rubygems'
 require 'active_support'
+require 'open4'
 
 # rvideo
 require 'rvideo/inspector'

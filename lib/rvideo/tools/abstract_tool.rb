@@ -54,7 +54,8 @@ module RVideo # :nodoc:
           
           # Progress reporting
           if block_given?
-            final_command = "#{@command} 2>&1"
+            final_command = @command
+            puts final_command
             RVideo.logger.info("\nExecuting Command: #{final_command}\n")
             @raw_result = ''
             duration = 0
@@ -66,28 +67,27 @@ module RVideo # :nodoc:
             mutex = Mutex.new
             
             command_thread = Thread.new do 
-              IO.popen(final_command) do |pipe|
-
-                pipe.each("\r") do |line|
-                  if line != previous_line
-                    previous_line = line
-                    new_progress, duration = parse_progress(line, duration)
-                    # puts "N"+new_progress
-                    # unless new_progress.nil?
-                      mutex.synchronize do
-                        @progress = new_progress
-                        progress_update_count += 1
-                      end
-                    # end
-                    # progress_updates << new_progress
-                    $defout.flush
-                  end
-                  # WARNING: we may need to set a limit to how many lines are appended to @raw_result as ffmpeg can spit out a massive amount of info if things go pear shaped
-                  @raw_result += line + "\r" 
+              command_pid, stdin, stdout, stderr = Open4::popen4(final_command)
+              stderr.each("\r") do |line|
+                if line != previous_line
+                  previous_line = line
+                  new_progress, duration = parse_progress(line, duration)
+                  # puts "N"+new_progress
+                  # unless new_progress.nil?
+                    mutex.synchronize do
+                      @progress = new_progress
+                      progress_update_count += 1
+                    end
+                  # end
+                  # progress_updates << new_progress
+                  $defout.flush
                 end
+                # WARNING: we may need to set a limit to how many lines are appended to @raw_result as ffmpeg can spit out a massive amount of info if things go pear shaped
+                @raw_result += line + "\r"
               end
             end
-                            puts command_pid
+            
+            puts "command_pid: #{command_pid}"
             # Yield the progress and monitor the process
             sample_rate = 0.5
             process_timeout = 3 # If the process doesn't report a progress update after 60 seconds we will assumed its stalled and kill it
@@ -119,6 +119,7 @@ module RVideo # :nodoc:
               
               if current_timeout >= process_timeout
                 puts "KILL FFMPEG #{command_pid}"
+                Process.kill("SIGKILL", command_pid)
               end
               yield progress_to_yeild
               
