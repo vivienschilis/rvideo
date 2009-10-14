@@ -22,6 +22,7 @@ lib/rvideo/tools/mp4creator.rb
 lib/rvideo/tools/mplayer.rb
 lib/rvideo/tools/qtfaststart.rb
 lib/rvideo/tools/yamdi.rb
+lib/rvideo/tools/segmenter.rb
 lib/rvideo/transcoder.rb
 lib/rvideo/version.rb
 lib/rvideo.rb
