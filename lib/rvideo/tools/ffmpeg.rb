@@ -46,6 +46,15 @@ module RVideo
       
       attr_reader :frame, :q, :size, :time, :output_bitrate, :video_size, :audio_size, :header_size, :overhead, :psnr, :output_fps, :pid
       
+      def initialize(raw_command, options = {})
+        @progress_sample_rate = options.delete(:progress_sample_rate)
+        @progress_timeout = options.delete(:progress_timeout)
+        
+        @raw_command = raw_command
+        @options = HashWithIndifferentAccess.new(options)
+        @command = interpolate_variables(raw_command)
+      end
+      
       # Not sure if this is needed anymore...
       def tool_command
         'ffmpeg'
@@ -146,8 +155,6 @@ module RVideo
         end
         
         # Yield the progress and monitor the process
-        sample_rate = 0.5
-        process_timeout = 60 # If the process doesn't report a progress update after 60 seconds we will assumed its stalled and kill it
         current_timeout = 0
         progress_to_yeild = nil
         
@@ -158,14 +165,17 @@ module RVideo
           mutex.synchronize do
             # First check if we're actually making progress! We should kill the command if it's not, as it's probably because ffmpeg has frozen
             if progress_to_yeild == @progress
-              current_timeout += sample_rate
+              current_timeout += @progress_sample_rate
             end
             progress_to_yeild = @progress
           end
           
-          self.kill if current_timeout >= process_timeout
+          unless @progress_timeout == false
+            self.kill if current_timeout >= @progress_timeout
+          end
+          
           yield progress_to_yeild
-          sleep sample_rate
+          sleep @progress_sample_rate
         end
       end
       

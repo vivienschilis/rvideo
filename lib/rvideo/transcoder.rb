@@ -65,7 +65,8 @@ module RVideo # :nodoc:
     #
     
     def execute(task, options = {})
-      options[:progress] ||= false
+      options[:progress_sample_rate] ||= 5
+      options[:progress_timeout] ||= false
       
       t1 = Time.now
       
@@ -75,8 +76,12 @@ module RVideo # :nodoc:
       
       RVideo.logger.info("\nNew transcoder job\n================\nTask: #{task}\nOptions: #{options.inspect}")
       
-      parse_and_execute(task, options) do |progress|
-        yield progress if block_given?
+      if block_given?
+        parse_and_execute(task, options) do |tool, progress|
+          yield(tool, progress)
+        end
+      else
+        parse_and_execute(task, options)
       end
 
       @processed = Inspector.new(:file => options[:output_file])
@@ -119,8 +124,12 @@ module RVideo # :nodoc:
         tool = Tools::AbstractTool.assign(c, options)
         tool.original = original
         
-        tool.execute do |progress|
-          yield({:tool => tool, :progress => progress})
+        if block_given?
+          tool.execute do |progress|
+            yield(tool, progress)
+          end
+        else
+          tool.execute
         end
         
         executed_commands << tool

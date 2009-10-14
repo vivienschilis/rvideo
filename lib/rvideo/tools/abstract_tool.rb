@@ -51,14 +51,13 @@ module RVideo # :nodoc:
 
         def execute
           @output_params = {}
-          
-          if self.respond_to?(:execute_with_progress)
+          if block_given? and self.respond_to?(:execute_with_progress)
             execute_with_progress do |progress|
               yield progress
             end
           else
             # Dump the log output into a temp file
-            log_temp_file_name = "/tmp/transcode_output_#{Time.now.to_i}.txt"
+            log_temp_file_name = "/tmp/transcode_output_#{Time.now.to_i}_#{rand(100)}.txt"
 
             final_command = "#{@command} 2>#{log_temp_file_name}"
             RVideo.logger.info("\nExecuting Command: #{final_command}\n")
