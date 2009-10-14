@@ -3,6 +3,8 @@ module RVideo
     class Segmenter
       include AbstractTool::InstanceMethods
       
+      attr_reader :raw_metadata
+      
       def tool_command
         'segmenter'
       end
