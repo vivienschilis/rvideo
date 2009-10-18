@@ -190,6 +190,7 @@ private
         if line =~ /Duration: (\d{2}):(\d{2}):(\d{2}).(\d{1})/
           duration = (($1.to_i * 60 + $2.to_i) * 60 + $3.to_i) * 10 + $4.to_i
         end
+        
         if line =~ /time=(\d+).(\d+)/
           if not duration.nil? and duration != 0
             p = ($1.to_i * 10 + $2.to_i) * 100 / duration
@@ -197,9 +198,8 @@ private
             p = 0
           end
           p = 100 if p > 100
-          return [p, duration]
         end
-        nil
+        return [(p || nil), duration]
       end
       
       # Turns the temp log file into a useful string, from which we can parse the 
