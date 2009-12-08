@@ -33,8 +33,9 @@ module RVideo # :nodoc:
       elsif options[:file]
         initialize_with_file(options[:file], options[:ffmpeg_binary])
       end
-
-      metadata = /(Input \#.*)\n.+\n\Z/m.match(@raw_response)
+      
+      metadata = /(Input \#.*)\n(Must|At\sleast)/m.match(@raw_response)
+      # metadata = /(Input \#.*)\n.+\n\Z/m.match(@raw_response)
       
       if /Unknown format/i.match(@raw_response) || metadata.nil?
         @unknown_format = true
