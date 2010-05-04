@@ -49,8 +49,7 @@ module RVideo
       @inspector = Inspector.new :file => @input
       
       @offset, @rate, @limit, @output = parse_options options
-      
-      @command = "ffmpeg -i #{@input.shell_quoted} -ss #{@offset} -r #{@rate} #{@output.shell_quoted}"
+      @command = "ffmpeg -i #{@input.shell_quoted} -ss #{@offset}  -vframes 1  -vcodec mjpeg  -y -f image2 #{@output.shell_quoted}"
     end
     
     def capture!
