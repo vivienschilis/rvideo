@@ -47,8 +47,8 @@ module RVideo
       attr_reader :frame, :q, :size, :time, :output_bitrate, :video_size, :audio_size, :header_size, :overhead, :psnr, :output_fps, :pid
       
       def initialize(raw_command, options = {})
-        @progress_sample_rate = options.delete(:progress_sample_rate)
-        @progress_timeout = options.delete(:progress_timeout)
+        @progress_sample_rate = options[:progress_sample_rate]
+        @progress_timeout = options[:progress_timeout]
         
         @raw_command = raw_command
         @options = HashWithIndifferentAccess.new(options)
