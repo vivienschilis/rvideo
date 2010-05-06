@@ -129,6 +129,10 @@ module RVideo
         "-ar #{params[:sample_rate]}"
       end
       
+      def do_execute_with_progress(command)
+        Open4::popen4(command)
+      end
+      
       def execute_with_progress
         # TODO put progress_counter stuff back in because long videos might not update their progress for some time and we wouldn't want to accidently kill them!
         final_command = @command
@@ -139,7 +143,7 @@ module RVideo
         mutex = Mutex.new
         
         command_thread = Thread.new do 
-          @pid, stdin, stdout, stderr = Open4::popen4(final_command)
+          @pid, stdin, stdout, stderr = do_execute_with_progress(final_command)
           stderr.each("\r") do |line|
             if line != previous_line
               previous_line = line
