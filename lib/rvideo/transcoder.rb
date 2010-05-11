@@ -119,7 +119,7 @@ module RVideo # :nodoc:
       raise TranscoderError::ParameterError, "Expected a recipe class (as a string), but got a #{task.class.to_s} (#{task})" unless task.is_a? String
       options = options.merge(:input_file => @input_file)
       
-      commands = task.split("\n").compact
+      commands = task.split(/[\n;]/).compact
       commands.each do |c|
         tool = Tools::AbstractTool.assign(c, options)
         tool.original = original
