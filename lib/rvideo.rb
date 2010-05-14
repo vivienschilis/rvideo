@@ -10,6 +10,7 @@ require 'active_support'
 require 'open4'
 
 # rvideo
+require 'rvideo/command_executor'
 require 'rvideo/inspector'
 require 'rvideo/frame_capturer'
 require 'rvideo/errors'

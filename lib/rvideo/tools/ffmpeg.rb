@@ -130,63 +130,21 @@ module RVideo
       end
       
       def do_execute_with_progress(command)
-        Open4::popen4(command)
+        @raw_result = ''
+        duration = 0
+        execute_with_block(final_command, "\r") do |line|
+          progress, duration = parse_progress(line, duration)
+          yield parse_progress
+          @raw_result += line + "\r"            
+        end
       end
       
       def execute_with_progress
-        # TODO put progress_counter stuff back in because long videos might not update their progress for some time and we wouldn't want to accidently kill them!
-        final_command = @command
-        RVideo.logger.info("\nExecuting Command: #{final_command}\n")
-        @raw_result = ''
-        duration = 0
-        previous_line = nil
-        mutex = Mutex.new
-        
-        command_thread = Thread.new do 
-          @pid, stdin, stdout, stderr = do_execute_with_progress(final_command)
-          stderr.each("\r") do |line|
-            if line != previous_line
-              previous_line = line
-              new_progress, duration = parse_progress(line, duration)
-                mutex.synchronize do
-                  @progress = new_progress
-                end
-              $defout.flush
-            end
-            # WARNING: we may need to set a limit to how many lines are appended to @raw_result as ffmpeg can spit out a massive amount of info if things go pear shaped
-            @raw_result += line + "\r"
-          end
-        end
-        
-        # Yield the progress and monitor the process
-        current_timeout = 0
-        progress_to_yeild = nil
-        
-        loop do
-          # Exit when the command is done
-          break unless command_thread.alive?
-          # Yield the progress
-          mutex.synchronize do
-            # First check if we're actually making progress! We should kill the command if it's not, as it's probably because ffmpeg has frozen
-            if progress_to_yeild == @progress
-              current_timeout += @progress_sample_rate
-            end
-            progress_to_yeild = @progress
-          end
-          
-          unless @progress_timeout == false
-            self.kill if current_timeout >= @progress_timeout
-          end
-          
-          yield progress_to_yeild
-          sleep @progress_sample_rate
-        end
-      end
-      
-      def kill
-        Process.kill("SIGKILL", @pid)
+        RVideo.logger.info("\nExecuting Command: #{@command}\n")
+        do_execute_with_progress(@command)
+      rescue RVideo::CommandExecutor::ProcessHungError
         raise TranscoderError, "Transcoder hung."
-      end
+      end      
       
 private
       
