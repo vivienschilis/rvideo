@@ -46,11 +46,11 @@ module RVideo
     
     context Mencoder, " result parsing should raise an exception" do
       
-      setup do
+      before(:each) do
         setup_mencoder_spec
       end
       
-      specify "when not passed a command" do
+      it "when not passed a command" do
         result = "MEncoder 1.0rc1-4.0.1 (C) 2000-2006 MPlayer Team
         CPU: Intel(R) Core(TM)2 CPU         T7400  @ 2.16GHz (Family: 6, Model: 15, Stepping: 6)
         CPUflags: Type: 6 MMX: 1 MMX2: 1 3DNow: 0 3DNow2: 0 SSE: 1 SSE2: 1

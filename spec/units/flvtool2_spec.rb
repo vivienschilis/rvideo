@@ -4,7 +4,7 @@ module RVideo
   module Tools
   
     describe Flvtool2 do
-      before do
+      before(:each) do
         setup_flvtool2_spec
       end
       
@@ -35,7 +35,7 @@ module RVideo
     end
 
     describe Flvtool2, " when parsing a result" do
-      before do
+      before(:each) do
         setup_flvtool2_spec
       end
       
@@ -51,35 +51,35 @@ module RVideo
     
     context Flvtool2, " result parsing should raise an exception" do
       
-      setup do
+      before(:each) do
         setup_flvtool2_spec
       end
       
-      specify "when not passed a command" do
+      it "when not passed a command" do
         lambda {
           @flvtool2.send(:parse_result, @helptext)
         }.should raise_error(TranscoderError::InvalidCommand, /flvtool2 help text/)
       end
       
-      specify "when receiving an empty file" do
+      it "when receiving an empty file" do
         lambda {
           @flvtool2.send(:parse_result, @empty_file)
         }.should raise_error(TranscoderError::InvalidFile, /Output file was empty/)
       end
       
-      specify "when passed an invalid input file" do
+      it "when passed an invalid input file" do
         lambda {
           @flvtool2.send(:parse_result, @non_flv_input)
         }.should raise_error(TranscoderError::InvalidFile, "input must be a valid FLV file")
       end
       
-      specify "when input file not found" do
+      it "when input file not found" do
         lambda {
           @flvtool2.send(:parse_result, @no_input_file)
         }.should raise_error(TranscoderError::InputFileNotFound, /^ERROR: No such file or directory/)
       end
       
-      specify "when receiving unexpected results" do
+      it "when receiving unexpected results" do
         lambda {
           @flvtool2.send(:parse_result, @unexpected_results)
         }.should raise_error(TranscoderError::UnexpectedResult, /ffmpeg/i)

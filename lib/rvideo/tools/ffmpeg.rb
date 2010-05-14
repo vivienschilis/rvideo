@@ -1,6 +1,7 @@
 module RVideo
   module Tools
     class Ffmpeg
+      
       RESOLUTION_ABBREVIATIONS = {
         "sqcif"  => "128x96",
         "qcif"   => "176x144",
@@ -129,19 +130,19 @@ module RVideo
         "-ar #{params[:sample_rate]}"
       end
       
-      def do_execute_with_progress(command)
+      def do_execute_with_progress(command,&block)
         @raw_result = ''
         duration = 0
-        execute_with_block(command, "\r") do |line|
+        CommandExecutor::execute_with_block(command, "\r") do |line|
           progress, duration = parse_progress(line, duration)
-          yield parse_progress
+          block.call(progress) if block
           @raw_result += line + "\r"            
         end
       end
       
-      def execute_with_progress
+      def execute_with_progress(&block)
         RVideo.logger.info("\nExecuting Command: #{@command}\n")
-        do_execute_with_progress(@command)
+        do_execute_with_progress(@command, &block)
       rescue RVideo::CommandExecutor::ProcessHungError
         raise TranscoderError, "Transcoder hung."
       end      

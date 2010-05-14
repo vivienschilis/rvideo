@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 module RVideo
   context "Using various builds of ffmpeg, RVideo should properly inspect" do
-    specify "a cell-phone MP4 file" do
+    it "a cell-phone MP4 file" do
       file = Inspector.new(:raw_response => files(:kites))
       file.container.should == "mov,mp4,m4a,3gp,3g2,mj2"
       file.raw_duration.should == "00:00:19.6"
@@ -22,7 +22,7 @@ module RVideo
       file.fps.should == "10.00"
     end
     
-    specify "a cell-phone MP4 file (2)" do
+    it "a cell-phone MP4 file (2)" do
       file = Inspector.new(:raw_response => files(:kites2))
       file.container.should == "mov,mp4,m4a,3gp,3g2,mj2"
       file.raw_duration.should == "00:00:19.6"
@@ -42,7 +42,7 @@ module RVideo
       file.fps.should == "10.00"
     end
     
-    specify "fancypants" do
+    it "fancypants" do
       file = Inspector.new(:raw_response => files(:fancypants))
       file.container.should == "mov,mp4,m4a,3gp,3g2,mj2"
       file.raw_duration.should == "00:00:35.4"
@@ -62,7 +62,7 @@ module RVideo
       file.fps.should == "23.98"
     end
     
-    specify "mpeg4/xvid" do
+    it "mpeg4/xvid" do
       file = Inspector.new(:raw_response => files(:chainsaw))
       file.container.should == "mov,mp4,m4a,3gp,3g2,mj2"
       file.raw_duration.should == "00:01:09.5"
@@ -82,7 +82,7 @@ module RVideo
       file.fps.should == "23.98"
     end
     
-    specify "mpeg1" do
+    it "mpeg1" do
       file = Inspector.new(:raw_response => files(:mpeg1_957))
       file.container.should == "mpeg"
       file.raw_duration.should == "00:00:22.6"
@@ -102,7 +102,7 @@ module RVideo
       file.fps.should == "25.00"
     end
     
-    specify "avi/mpeg4/mp3" do
+    it "avi/mpeg4/mp3" do
       file = Inspector.new(:raw_response => files(:buffy))
       file.container.should == "avi"
       file.raw_duration.should == "00:43:25.3"
@@ -122,7 +122,7 @@ module RVideo
       file.fps.should == "23.98"
     end
     
-    specify "HD mpeg2" do
+    it "HD mpeg2" do
       file = Inspector.new(:raw_response => files(:chairprank))
       file.container.should == "mov,mp4,m4a,3gp,3g2,mj2"
       file.raw_duration.should == "00:00:36.6"
@@ -142,7 +142,7 @@ module RVideo
       file.fps.should == "29.97"
     end
     
-    specify "h264 (1)" do
+    it "h264 (1)" do
       file = Inspector.new(:raw_response => files(:fire_short))
       file.container.should == "mov,mp4,m4a,3gp,3g2,mj2"
       file.raw_duration.should == "00:00:10.0"
@@ -162,7 +162,7 @@ module RVideo
       file.fps.should == "29.97"
     end
     
-    specify "h264 video only" do
+    it "h264 video only" do
       file = Inspector.new(:raw_response => files(:fire_video_only))
       file.container.should == "mov,mp4,m4a,3gp,3g2,mj2"
       file.raw_duration.should == "00:00:10.0"
@@ -179,7 +179,7 @@ module RVideo
       file.fps.should == "29.97"
     end
     
-    specify "aac audio only" do
+    it "aac audio only" do
       file = Inspector.new(:raw_response => files(:fire_audio_only))
       file.container.should == "mov,mp4,m4a,3gp,3g2,mj2"
       file.raw_duration.should == "00:00:10.0"
@@ -195,7 +195,7 @@ module RVideo
       file.video_codec.should be_nil
     end
     
-    specify "apple intermediate" do
+    it "apple intermediate" do
       file = Inspector.new(:raw_response => files(:fireproof))
       file.container.should == "mov,mp4,m4a,3gp,3g2,mj2"
       file.raw_duration.should == "00:00:18.7"
@@ -215,55 +215,55 @@ module RVideo
       file.fps.should == "600.00" # this is a known FFMPEG problem
     end
     
-    specify "dv video" do
+    it "dv video" do
       
     end
     
-    specify "msmpeg4" do
+    it "msmpeg4" do
       
     end
     
-    specify "mpeg2 ac3" do
+    it "mpeg2 ac3" do
       
     end
     
-    specify "m4v h264" do
+    it "m4v h264" do
       
     end
     
-    specify "3g2" do
+    it "3g2" do
       
     end
     
-    specify "3gp (1)" do
+    it "3gp (1)" do
       
     end
     
-    specify "3gp (2)" do
+    it "3gp (2)" do
       
     end
     
-    specify "flv" do
+    it "flv" do
       
     end
     
-    specify "wmv (1)" do
+    it "wmv (1)" do
       
     end
     
-    specify "wmv/wmv3/wmav2" do
+    it "wmv/wmv3/wmav2" do
       
     end
     
-    specify "wmva/wmva2" do
+    it "wmva/wmva2" do
       
     end
     
-    specify "mov/msmpeg4" do
+    it "mov/msmpeg4" do
       
     end
     
-    specify "audio only mp3" do
+    it "audio only mp3" do
       file = Inspector.new(:raw_response => files(:duck))
       file.container.should == "mp3"
       file.raw_duration.should == "00:02:03.0"
@@ -279,7 +279,7 @@ module RVideo
       file.video?.should == false
     end
     
-    specify "audio only aac" do
+    it "audio only aac" do
       file = Inspector.new(:raw_response => files(:eiffel))
       file.container.should == "mov,mp4,m4a,3gp,3g2,mj2"
       file.raw_duration.should == "00:02:50.3"
@@ -295,7 +295,7 @@ module RVideo
       file.video?.should == false
     end
     
-    specify "invalid file" do
+    it "invalid file" do
       file = Inspector.new(:raw_response => files(:invalid))
       file.container.should == "mov,mp4,m4a,3gp,3g2,mj2"
       file.raw_duration.should be_nil
@@ -304,7 +304,7 @@ module RVideo
       file.unreadable_file?.should be_true
     end
     
-    specify "failing mp3 file" do
+    it "failing mp3 file" do
       file = Inspector.new(:raw_response => files(:failing_ogg))
       file.raw_duration.should be_nil
       file.invalid?.should be_true

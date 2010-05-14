@@ -35,6 +35,10 @@ module RVideo
         @ffmpeg.execute
       end
       
+      it "should execute execute_with_progress" do
+        @ffmpeg.execute_with_progress
+      end
+      
       it "should mixin AbstractTool" do
         Ffmpeg.included_modules.include?(AbstractTool::InstanceMethods).should be_true
       end
@@ -261,59 +265,59 @@ module RVideo
       end
     end
     
-    context Ffmpeg, "result parsing should raise an exception" do
-      setup do
+    describe Ffmpeg, "result parsing should raise an exception" do
+      before(:each) do
         setup_ffmpeg_spec
         @results = load_fixture :ffmpeg_results
       end
       
-      specify "when a param is missing a value" do
+      it "when a param is missing a value" do
         parsing_result(:param_missing_value).
           should raise_error(TranscoderError::InvalidCommand, /Expected .+ for .+ but found: .+/)
       end
       
-      specify "when codec not supported" do
+      it "when codec not supported" do
         parsing_result(:amr_nb_not_supported).
           should raise_error(TranscoderError::InvalidFile, "Codec amr_nb not supported by this build of ffmpeg")
       end
       
-      specify "when not passed a command" do
+      it "when not passed a command" do
         parsing_result(:missing_command).
           should raise_error(TranscoderError::InvalidCommand, "must pass a command to ffmpeg")
       end
       
-      specify "when given a broken command" do
+      it "when given a broken command" do
         parsing_result(:broken_command).
           should raise_error(TranscoderError::InvalidCommand, "Unable for find a suitable output format for 'foo'")
       end
       
-      specify "when the output file has no streams" do
+      it "when the output file has no streams" do
         parsing_result(:output_has_no_streams).
           should raise_error(TranscoderError, /Output file does not contain.*stream/)
       end
       
-      specify "when given a missing input file" do
+      it "when given a missing input file" do
         parsing_result(:missing_input_file).
           should raise_error(TranscoderError::InvalidFile, /I\/O error: .+/)
       end
       
-      specify "when given a file it can't handle"
+      it "when given a file it can't handle"
       
-      specify "when cancelled halfway through"
+      it "when cancelled halfway through"
     
-      specify "when receiving unexpected results" do
+      it "when receiving unexpected results" do
         parsing_result(:unexpected_results).
           should raise_error(TranscoderError::UnexpectedResult, 'foo - bar')
       end
       
-      specify "with an unsupported codec" do
+      it "with an unsupported codec" do
         @ffmpeg.original = Inspector.new(:raw_response => files('kites2'))
         
         parsing_result(:unsupported_codec).
           should raise_error(TranscoderError::InvalidFile, /samr/)
       end
       
-      specify "when a stream cannot be written" do
+      it "when a stream cannot be written" do
         parsing_result(:unwritable_stream).
           should raise_error(TranscoderError, /flv doesnt support.*incorrect codec/)
       end
