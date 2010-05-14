@@ -34,7 +34,6 @@ lib/rvideo/transcoder.rb
 lib/rvideo/version.rb
 rvideo.gemspec
 scripts/txt2html
-setup.rb
 spec/files/boat.avi
 spec/files/kites.mp4
 spec/fixtures/ffmpeg_builds.yml
