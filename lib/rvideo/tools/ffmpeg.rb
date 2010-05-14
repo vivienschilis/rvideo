@@ -132,7 +132,7 @@ module RVideo
       def do_execute_with_progress(command)
         @raw_result = ''
         duration = 0
-        execute_with_block(final_command, "\r") do |line|
+        execute_with_block(command, "\r") do |line|
           progress, duration = parse_progress(line, duration)
           yield parse_progress
           @raw_result += line + "\r"            
