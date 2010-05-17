@@ -56,31 +56,16 @@ module RVideo # :nodoc:
               yield progress
             end
           else
-            # Dump the log output into a temp file
-            log_temp_file_name = "/tmp/transcode_output_#{Time.now.to_i}_#{rand(100)}.txt"
-
-            final_command = "#{@command} 2>#{log_temp_file_name}"
-            RVideo.logger.info("\nExecuting Command: #{final_command}\n")
-            
-            do_execute final_command
-            populate_raw_result(log_temp_file_name)
+            RVideo.logger.info("\nExecuting Command: #{@command}\n")
+            @raw_result = do_execute(@command)
           end
       
           RVideo.logger.info("Result: \n#{@raw_result}")
           parse_result(@raw_result)
-      
-          # Cleanup log file
-          begin
-            File.delete(log_temp_file_name)
-          rescue Exception  => e
-            RVideo.logger.error("Failed to delete output log file: #{log_temp_file_name}, e=#{e}")
-          end
         end
     
-        # Wrapper around the system call, for whenever we need to 
-        # hook on or redefine this without messing with Kernel
         def do_execute(command)
-          system command
+          CommandExecutor::execute_tailing_stderr(command, 500)
         end
     
         #
