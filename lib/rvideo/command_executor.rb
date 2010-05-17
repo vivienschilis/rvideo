@@ -76,7 +76,14 @@ module RVideo
       ensure
         Process.kill("SIGKILL", pid)
       end
-
+    end
+    
+    def self.execute_tailing_stderr(command, number_of_lines = 500)
+      result = String.new
+      open4(command) do |pid, i, o, e|
+        open4.spawn "tail -n #{number_of_lines}", :stdin=>e, :stdout=>result, :stdin_timeout => 50
+      end
+      result
     end
 
   end

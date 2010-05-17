@@ -10,6 +10,20 @@ describe RVideo::CommandExecutor do
     @file = "/tmp/command_executor_tmp_output"
     FileUtils.rm_f(@file)
   end
+  
+  
+  describe "exectue_tailing_stderr" do
+    
+    it "should execute command" do
+      CommandExecutor::execute_tailing_stderr("echo abc 1>&2").should == "abc\n"      
+    end
+    
+    it "should return only specified number of lines from output" do
+      CommandExecutor::execute_tailing_stderr("echo abc 1>&2; echo def 1>&2; echo ghi 1>&2; echo jkl 1>&2;", 2).should == "ghi\njkl\n" 
+    end
+    
+  end
+  
 
   describe "execute with block" do
 
