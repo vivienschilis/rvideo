@@ -380,12 +380,6 @@ module RVideo # :nodoc:
         @original = Inspector.new(:file => options[:input_file])
       end
 
-      # Pulls the interesting bits of the temp log file into memory.  This is fairly tool-specific, so
-      # it's doubtful that this default version is going to work without being overridded.
-      def populate_raw_result(temp_file_name)
-        @raw_result = `tail -n 500 #{temp_file_name}`
-      end
-
     end # InstanceMethods
   end
 

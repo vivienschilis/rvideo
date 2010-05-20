@@ -18,7 +18,6 @@ module RVideo
       
       it "should call parse_result on execute, with a result string" do
         @flvtool2.stub!(:do_execute)
-        @flvtool2.stub!(:populate_raw_result) # avoid `tail` barfing because there's no log file
         @flvtool2.should_receive(:parse_result).once #.with /\AERROR: No such file or directory/
         @flvtool2.execute
       end

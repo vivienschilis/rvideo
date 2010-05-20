@@ -165,31 +165,6 @@ private
         return [(p || nil), duration]
       end
       
-      # Turns the temp log file into a useful string, from which we can parse the 
-      # transcoding results.
-      # These log files can be enormous, so pulling the whole thing into memory is not an 
-      # option.
-      def populate_raw_result(temp_file_name)
-        @raw_result = ""
-        
-        # Is the log file exceptionally long?  It's really not a big deal to pull in a thousand lines or so
-        # into memory.  It's the gigantic files that cause problems.  If the files isn't too large, 
-        # just pull it in.
-        line_count = 0
-        if m = /^\s*(\d+)/.match(`wc -l #{temp_file_name}`)
-          line_count = m[1].to_i
-        end
-        
-        if line_count > 500
-          # Find the message indicating that the command is actually running.
-          running_string = "Press .* to stop encoding"
-          @raw_result << `grep "#{running_string}" #{temp_file_name}`
-        end
-
-        # Append the bottom of the log file, where the interesting bits live.
-        @raw_result << `tail -n 500 #{temp_file_name}`
-      end
-      
       def parse_result(result)
         if m = /Expected .+ for (.+) but found: (.+)/.match(result)
           raise TranscoderError::InvalidCommand, m.to_s
