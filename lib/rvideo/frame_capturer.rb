@@ -54,10 +54,14 @@ module RVideo
 
     def capture!
       RVideo.logger.info("\nCreating Screenshot: #{@command}\n")
-      frame_result = `#{@command} 2>&1`
+      frame_result = do_execute("#{@command} 2>&1")
       RVideo.logger.info("\nScreenshot results: #{frame_result}")
 
       Dir[File.expand_path(@output).sub("%d", "*")].entries
+    end
+
+    def do_execute(command)
+      `#{command}`
     end
 
     VALID_TIMECODE_FORMAT = /\A([0-9.,]*)(s|f|%)?\Z/
