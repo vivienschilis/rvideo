@@ -300,7 +300,7 @@ module RVideo # :nodoc:
       when "mono"   then 1
       when "stereo" then 2
       else
-        raise RuntimeError, "Unknown number of channels: #{audio_channels}"
+        raise RuntimeError, "Unknown number of channels"
       end
     end
     
