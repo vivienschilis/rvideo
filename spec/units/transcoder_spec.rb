@@ -78,8 +78,7 @@ module RVideo
       @mock_original_file.stub!(:invalid?).and_return false
       @mock_processed_file.stub!(:duration).and_return 10
       @mock_processed_file.stub!(:invalid?).and_return false
-      #Inspector.should_receive(:new).once.with(:file => "foo").and_return(@mock_original_file)
-      Inspector.should_receive(:new).once.with(:file => "bar").and_return(@mock_processed_file)
+      Inspector.stub!(:new).with(:file => "bar").and_return(@mock_processed_file)
     end
 
     it "should call the inspector twice on a successful job, and should set @original and @processed" do
