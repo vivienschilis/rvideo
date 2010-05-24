@@ -1,6 +1,6 @@
 module RVideo
   module Tools
-    class HandBrakeCli
+    class HandBrakeCLI
       include AbstractTool::InstanceMethods
       attr_reader :raw_metadata
       
