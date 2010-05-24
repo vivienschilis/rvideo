@@ -3,13 +3,13 @@ require File.dirname(__FILE__) + '/../spec_helper'
 module RVideo
   module Tools
   
-    describe HandBrakeCLI do
+    describe HandBrakeCli do
       before do
         setup_hbcli_spec
       end
       
       it "should initialize with valid arguments" do
-        @hbcli.class.should == HandBrakeCLI
+        @hbcli.class.should == HandBrakeCli
       end
       
       it "should have the correct tool_command" do
@@ -17,7 +17,7 @@ module RVideo
       end
             
       it "should mixin AbstractTool" do
-        HandBrakeCLI.included_modules.include?(AbstractTool::InstanceMethods).should be_true
+        HandBrakeCli.included_modules.include?(AbstractTool::InstanceMethods).should be_true
       end
       
       it "should set supported options successfully" do
@@ -36,5 +36,5 @@ end
 def setup_hbcli_spec
   @options = {:input_file => "foo.mp4", :output_file => "foo2.mp4"}
   @command = "HandBrake -i $input_file$ -o $output_file$"
-  @hbcli = RVideo::Tools::HandBrakeCLI.new(@command, @options)
+  @hbcli = RVideo::Tools::HandBrakeCli.new(@command, @options)
 end

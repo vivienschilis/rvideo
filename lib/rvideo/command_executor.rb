@@ -65,10 +65,12 @@ module RVideo
 
     STDOUT_TIMEOUT = 200
 
-    def self.execute_with_block(command, line_separator=$/)
+    def self.execute_with_block(command, line_separator=$/, use_stderr = true)
       begin
-        pid, stdin, stout, stderr = Open4::open4(command)
-        stderr.each_with_timeout(STDOUT_TIMEOUT, line_separator) do |line|
+        pid, stdin, stdout, stderr = Open4::open4(command)
+        c_pipe = use_stderr ? stderr : stdout
+        
+        c_pipe.each_with_timeout(STDOUT_TIMEOUT, line_separator) do |line|
           yield line
         end
       rescue Timeout::Error => e
