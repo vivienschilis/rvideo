@@ -109,13 +109,15 @@ module RVideo
       end
       
       def format_resolution(params={})
-        p = "-s #{params[:scale][:width]}x#{params[:scale][:height]}"
+        p = ["scale=#{params[:scale][:width]}:#{params[:scale][:height]}"]
         if params[:letterbox]
           plr = ((params[:letterbox][:width] - params[:scale][:width]) / 2).to_i
           ptb = ((params[:letterbox][:height] - params[:scale][:height]) / 2).to_i
-          p += " -padtop #{ptb} -padbottom #{ptb} -padleft #{plr} -padright #{plr} "
+          width = params[:scale][:width] + plr
+          heigth = params[:scale][:height] + ptb
+          p << "pad=#{width}:#{heigth}:#{ptb}:#{ptb}" 
         end
-        p
+        %(-vf '#{p.join(',')}')
       end
 
       def format_audio_channels(params={})
@@ -162,7 +164,7 @@ private
           end
           p = 100 if p > 100
         end
-        return [(p || nil), duration]
+        return [(p || 0), duration]
       end
       
       def parse_result(result)
