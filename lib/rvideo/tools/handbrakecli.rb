@@ -8,6 +8,14 @@ module RVideo
         'HandBrakeCLI'
       end
       
+      
+      def execute_with_progress(&block)
+        RVideo.logger.info("\nExecuting Command: #{@command}\n")
+        do_execute_with_progress(@command, &block)
+      rescue RVideo::CommandExecutor::ProcessHungError
+        raise TranscoderError, "Transcoder hung."
+      end
+      
       private
       
       def parse_result(result)
@@ -36,21 +44,16 @@ module RVideo
           @raw_result += line + "\r"            
         end
       end
-      
-      def execute_with_progress(&block)
-        RVideo.logger.info("\nExecuting Command: #{@command}\n")
-        do_execute_with_progress(@command, &block)
-      rescue RVideo::CommandExecutor::ProcessHungError
-        raise TranscoderError, "Transcoder hung."
-      end
+
       
       def parse_progress(line)
+        p = 0
         if /Encoding: task (\d) of (\d), (\d{1,3}\.\d{1,2}) \%/
           p = $3.to_i
         end
 
         p = 100 if p > 100        
-        return p || 0
+        return p
       end
       
     end

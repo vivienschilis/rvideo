@@ -24,6 +24,11 @@ module RVideo
         @hbcli.options[:output_file].should == @options[:output_file]
         @hbcli.options[:input_file].should == @options[:input_file]
       end
+      
+      it "should execute execute_with_progress" do
+        @hbcli.execute_with_progress
+      end
+      
     end
   end
 end
