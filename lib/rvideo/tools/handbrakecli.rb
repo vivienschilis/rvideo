@@ -1,6 +1,6 @@
 module RVideo
   module Tools
-    class HandBrakeCLI
+    class HandBrakeCli
       include AbstractTool::InstanceMethods
       attr_reader :raw_metadata
       
@@ -45,7 +45,6 @@ module RVideo
         end
       end
 
-      
       def parse_progress(line)
         p = 0
         if /Encoding: task (\d) of (\d), (\d{1,3}\.\d{1,2}) \%/
