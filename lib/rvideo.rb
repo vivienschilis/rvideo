@@ -26,6 +26,7 @@ require 'rvideo/tools/ffmpeg2theora'
 require 'rvideo/tools/yamdi'
 require 'rvideo/tools/qtfaststart'
 require 'rvideo/tools/segmenter'
+require 'rvideo/tools/handbrakecli'
 
 TEMP_PATH   = File.expand_path(File.dirname(__FILE__) + '/../tmp')
 REPORT_PATH = File.expand_path(File.dirname(__FILE__) + '/../report')
