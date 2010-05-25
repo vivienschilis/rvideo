@@ -73,9 +73,6 @@ module RVideo # :nodoc:
     #
 
     def execute(task, options = {})
-      options[:progress_sample_rate] ||= 5
-      options[:progress_timeout] ||= false
-
       t1 = Time.now
 
       if @input_file.nil?

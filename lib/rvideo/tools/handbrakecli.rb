@@ -8,7 +8,6 @@ module RVideo
         'HandBrakeCLI'
       end
       
-      
       def execute_with_progress(&block)
         RVideo.logger.info("\nExecuting Command: #{@command}\n")
         do_execute_with_progress(@command, &block)
@@ -16,6 +15,10 @@ module RVideo
         raise TranscoderError, "Transcoder hung."
       end
       
+      def format_resolution(params={})
+        "-w #{params[:scale][:width]} -l #{params[:scale][:height]}"
+      end
+                  
       private
       
       def parse_result(result)

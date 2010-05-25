@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 module RVideo
   module Tools
-  
+    
     describe HandBrakeCli do
       before do
         setup_hbcli_spec
@@ -27,6 +27,21 @@ module RVideo
       
       it "should execute execute_with_progress" do
         @hbcli.execute_with_progress
+      end
+      
+      describe "magic variables" do
+         before do
+           @options = {
+             :input_file  => spec_file("boat.avi"),
+             :output_file => "test"
+           }
+         end
+         
+         it 'supports :width and :height options to build :resolution' do
+           @options.merge! :width => "640", :height => "360"
+           hbcli = HandBrakeCli.new("HandBrakeCLI -i $input_file$ -o $output_file$ $resolution$", @options)
+           hbcli.command.should == "HandBrakeCLI -i '#{@options[:input_file]}' -o '#{@options[:output_file]}' -w 640 -l 360"
+         end
       end
       
     end

@@ -85,6 +85,24 @@ module RVideo
         ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -vf 'scale=480:360' -y '#{@options[:output_file]}'"
       end
       
+      it 'supports :width and :height options to build :resolution_and_padding' do
+        @options.merge! :width => "160", :height => "120"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution_and_padding$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -vf 'scale=160:120' -y '#{@options[:output_file]}'"
+      end
+      
+      it 'supports :width and :height options to build :resolution_and_padding with negatif ratio' do
+        @options.merge! :width => "120", :height => "160"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution_and_padding$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -vf 'scale=120:90,pad=120:125:0:35' -y '#{@options[:output_file]}'"
+      end
+      
+      it 'supports :width and :height options to build :resolution_and_padding with negatif ratio' do
+        @options.merge! :width => "160", :height => "100"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution_and_padding$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -vf 'scale=132:100' -y '#{@options[:output_file]}'"
+      end
+      
       ###
       
       it 'supports :video_bit_rate' do

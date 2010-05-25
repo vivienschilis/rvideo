@@ -144,6 +144,53 @@ module RVideo # :nodoc:
           end
         end
 
+
+        def resolution_and_padding
+          format_resolution(get_resolution_and_padding)
+        end
+
+        def get_resolution_and_padding
+          inspect_original if @original.nil?
+           
+          # Calculate resolution and any padding
+          in_w = @original.width.to_f
+          in_h = @original.height.to_f
+          out_w = @options["width"].to_f
+          out_h = @options["height"].to_f
+          
+          puts in_w
+          puts in_h
+
+          begin
+            aspect = in_w / in_h
+            aspect_inv = in_h / in_w
+          rescue
+            RVideo.logger.info "Couldn't do w/h to caculate aspect. Just using the output resolution now."
+            return { :scale => { :width => out_w, :height => height } }
+          end
+
+          height = (out_w / aspect.to_f).to_i
+          height -= 1 if height % 2 == 1
+
+          resolution = { :scale => { :width => out_w, :height => height } }
+
+          # Keep the video's original width if the height
+          if height > out_h
+            width = (out_h / aspect_inv.to_f).to_i
+            width -= 1 if width % 2 == 1
+
+            resolution = { :scale => { :width => width, :height => out_h } }
+
+            # Otherwise letterbox it
+          elsif height < out_h
+            resolution[:letterbox] ||= {}
+            resolution[:letterbox][:width] = out_w
+            resolution[:letterbox][:height] = out_h
+          end
+
+          return resolution
+        end
+
         def get_fit_to_width_resolution
           w = @options['width']
 
