@@ -68,8 +68,7 @@ module RVideo
       end
       
       def parse_progress(line)
-        p=0
-        if line =~ /Pos:[^(]*(s*(d+)%)/
+        if line =~ /Pos:[^(]*\((\d+)\%\)/
           p = $1.to_i
           p = 100 if p > 100
         end
