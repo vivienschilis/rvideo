@@ -384,11 +384,11 @@ module RVideo # :nodoc:
     end
     
     def video_orientation
-      @orientation ||= `qtrotate #{self.tmp_filepath}`.chomp.to_i
+      @orientation ||= `qtrotate #{path}`.chomp.to_i
     end
     
     def rotated?
-      @original.video_orientation == 90 || @original.video_orientation == 180  
+      video_orientation == 90 || video_orientation == 180  
     end
     
     def pixel_aspect_ratio
