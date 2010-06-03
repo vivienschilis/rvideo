@@ -106,7 +106,10 @@ module RVideo
       end
       
       def format_resolution(params={})
-        p = ["scale=#{params[:scale][:width].to_i}:#{params[:scale][:height].to_i}"]
+        p = []
+        inspect_original if @original.nil?
+        p << ["rotate=#{@original.video_orientation}"] if @original.rotated?
+        p << ["scale=#{params[:scale][:width].to_i}:#{params[:scale][:height].to_i}"]
         if params[:letterbox]
           plr = ((params[:letterbox][:width] - params[:scale][:width]) / 2).to_i
           ptb = ((params[:letterbox][:height] - params[:scale][:height]) / 2).to_i

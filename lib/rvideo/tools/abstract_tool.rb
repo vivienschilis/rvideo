@@ -153,8 +153,14 @@ module RVideo # :nodoc:
           inspect_original if @original.nil?
            
           # Calculate resolution and any padding
-          in_w = @original.width.to_f
-          in_h = @original.height.to_f
+          if @original.rotated?
+            in_w = @original.height.to_f 
+            in_h = @original.width.to_f
+          else
+            in_w = @original.width.to_f
+            in_h = @original.height.to_f
+          end
+          
           out_w = @options["width"].to_f
           out_h = @options["height"].to_f
           
