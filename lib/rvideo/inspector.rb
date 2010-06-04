@@ -384,7 +384,7 @@ module RVideo # :nodoc:
     end
     
     def video_orientation
-      @orientation ||= `qtrotate #{path}`.chomp.to_i
+      @orientation ||= `qtrotate #{full_filename}`.chomp.to_i
     end
     
     def rotated?
