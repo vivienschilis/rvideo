@@ -164,7 +164,7 @@ private
           end
           p = 100 if p > 100
         end
-        return [(p || 0), duration]
+        return [p, duration]
       end
       
       def parse_result(result)
