@@ -55,7 +55,13 @@ module RVideo # :nodoc:
           @output_params = {}
           if block_given? and self.respond_to?(:execute_with_progress)
             execute_with_progress do |progress|
-              yield progress
+              yield progress if progress != @progress
+              @progress = progress
+            end
+            
+            if @progress != 100
+              @progress = 100
+              yield @progress
             end
           else
             RVideo.logger.info("\nExecuting Command: #{@command}\n")
@@ -144,12 +150,11 @@ module RVideo # :nodoc:
           end
         end
 
-
         def resolution_and_padding
           format_resolution(get_resolution_and_padding)
         end
 
-        def get_resolution_and_padding
+        def get_resolution_and_padding(out_w = @options["width"], out_h = @options["height"])
           inspect_original if @original.nil?
            
           # Calculate resolution and any padding
@@ -161,12 +166,9 @@ module RVideo # :nodoc:
             in_h = @original.height.to_f
           end
           
-          out_w = @options["width"].to_f
-          out_h = @options["height"].to_f
+          out_w = out_w.to_f
+          out_h = out_h.to_f
           
-          puts in_w
-          puts in_h
-
           begin
             aspect = in_w / in_h
             aspect_inv = in_h / in_w
@@ -393,20 +395,27 @@ module RVideo # :nodoc:
         private
 
         VARIABLE_INTERPOLATION_SCAN_PATTERN = /[^\\]\$[-_a-zA-Z]+\$/
-
+        ONTHEFLY_SCALE_PATTERN = /[^\\](\$scale_([0-9]+)x([0-9]+)\$)/
+        
         def interpolate_variables(raw_command)
           raw_command.scan(VARIABLE_INTERPOLATION_SCAN_PATTERN).each do |match|
             match = match[0..0] == "$" ? match : match[1..(match.size - 1)]
             match.strip!
 
             value = if ["$input_file$", "$output_file$"].include?(match)
-            matched_variable(match).to_s.shell_quoted
-          else
-            matched_variable(match).to_s
+              matched_variable(match).to_s.shell_quoted
+            else
+              matched_variable(match).to_s
+            end
+            
+            raw_command.gsub!(match, value)
           end
+          
+         raw_command.scan(ONTHEFLY_SCALE_PATTERN).each do |match, width, height|
+           value = format_resolution(get_resolution_and_padding(width, height))
+           raw_command.gsub!(match, value)
+         end
 
-          raw_command.gsub!(match, value)
-        end
         raw_command.gsub("\\$", "$")
       end
 

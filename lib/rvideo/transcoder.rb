@@ -144,7 +144,8 @@ module RVideo # :nodoc:
             sum = progress_by_tools.values.inject(0) { |s,v| s += v }
             if commands_with_progress > 0
               total_progress = sum / commands_with_progress
-              yield(tool, total_progress)
+              yield(tool, total_progress) if total_progress != @prev_progress
+              @prev_progress = total_progress
             end
           end
         else
