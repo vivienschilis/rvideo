@@ -138,7 +138,7 @@ module RVideo
         CommandExecutor::execute_with_block(command, "\r") do |line|
           progress, duration = parse_progress(line, duration)
           block.call(progress) if block && progress
-          @raw_result += line + "\r"            
+          @raw_result += line.to_s + "\r"            
         end
       end
       

@@ -35,7 +35,7 @@ module RVideo
           raise TranscoderError::UnexpectedResult, "Undefined error"
         end
 
-        @raw_metadata = result.empty? ? "No Results" : result
+        @raw_metadata = result.to_s.empty? ? "No Results" : result
         return true
       end
       
@@ -43,18 +43,17 @@ module RVideo
         @raw_result = ''
         CommandExecutor::execute_with_block(command, "\r", false) do |line|
           progress = parse_progress(line)
-          block.call(progress) if block
-          @raw_result += line + "\r"            
+          block.call(progress) if block && progress
+          @raw_result += line.to_s + "\r" 
         end
       end
 
       def parse_progress(line)
-        p = 0
         if line =~ /Encoding: task (\d) of (\d), (\d{1,3}\.\d{1,2}) \%/
           p = $3.to_i
         end
 
-        p = 100 if p > 100        
+        p = 100 if p && p > 100        
         return p
       end
       

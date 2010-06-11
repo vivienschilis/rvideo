@@ -131,13 +131,21 @@ module RVideo # :nodoc:
       options = options.merge(:input_file => @input_file)
 
       commands = task.split(/[\n;]/).compact
+      commands_with_progress = number_of_tools_supporting_progress(commands)
+
+      progress_by_tools={}
       commands.each do |c|
         tool = Tools::AbstractTool.assign(c, options)
         tool.original = original
 
         if block_given?
           tool.execute do |progress|
-            yield(tool, progress)
+            progress_by_tools[c.object_id] = progress
+            sum = progress_by_tools.values.inject(0) { |s,v| s += v }
+            if commands_with_progress > 0
+              total_progress = sum / commands_with_progress
+              yield(tool, total_progress)
+            end
           end
         else
           tool.execute
@@ -146,5 +154,16 @@ module RVideo # :nodoc:
         executed_commands << tool
       end
     end
+  
+  
+    def number_of_tools_supporting_progress(commands)
+      n = 0
+      commands.each do |c|
+        tool_name = c.split(" ").first
+        n += 1 if RVideo::Tools.const_get(tool_name.underscore.classify).method_defined?(:execute_with_progress)
+      end
+      n
+    end
+  
   end
 end

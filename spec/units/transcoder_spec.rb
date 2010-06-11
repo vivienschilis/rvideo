@@ -137,7 +137,7 @@ module RVideo
     end
     
     it "should call five times with a five-line recipe" do
-      five_line = "ffmpeg -i foo \n ffmpeg -i bar \n flvtool -i foo \n mp4box \n qt tools 8"
+      five_line = "ffmpeg -i foo \n ffmpeg -i bar \n flvtool2 -i foo \n mp4box \n ffmpeg 8"
       Tools::AbstractTool.should_receive(:assign).exactly(5).and_return(@mock_tool)
       @transcoder.stub!(:do_execute)
       @transcoder.send(:parse_and_execute, five_line, @options)
