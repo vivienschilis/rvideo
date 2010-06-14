@@ -43,12 +43,12 @@ module RVideo # :nodoc:
         ###
 
         attr_reader :options, :command, :raw_result, :progress
-        attr_writer :original
 
         def initialize(raw_command, options = {})
           @raw_command = raw_command
           @options = HashWithIndifferentAccess.new(options)
           @command = interpolate_variables(raw_command)
+          @raw_result = ""
         end
 
         def execute
@@ -155,20 +155,14 @@ module RVideo # :nodoc:
         end
 
         def get_resolution_and_padding(out_w = @options["width"], out_h = @options["height"])
-          inspect_original if @original.nil?
-           
           # Calculate resolution and any padding
-          if @original.rotated?
-            in_w = @original.height.to_f 
-            in_h = @original.width.to_f
-          else
-            in_w = @original.width.to_f
-            in_h = @original.height.to_f
-          end
           
           out_w = out_w.to_f
           out_h = out_h.to_f
-          
+
+          in_w = original.width.to_f
+          in_h = original.height.to_f      
+
           begin
             aspect = in_w / in_h
             aspect_inv = in_h / in_w
@@ -392,11 +386,22 @@ module RVideo # :nodoc:
           { :video_bit_rate_max => @options["video_bit_rate_max"] }
         end
 
+        def original
+          inspect_original unless @original
+          @original
+        end
+
+        def original=(value)
+          @original=value
+        end
+
+        
         private
 
         VARIABLE_INTERPOLATION_SCAN_PATTERN = /[^\\]\$[-_a-zA-Z]+\$/
-        ONTHEFLY_SCALE_PATTERN = /[^\\](\$scale_([0-9]+)x([0-9]+)\$)/
-        
+        SCALE_PATTERN = /[^\\](\$scale_([0-9]+)x([0-9]+)\$)/
+        ADAPTIVE_SCALE_PATTERN = /[^\\](\$scale_([0-9]+)x([0-9]+)_or_([0-9]+)x([0-9]+)\$)/
+                
         def interpolate_variables(raw_command)
           raw_command.scan(VARIABLE_INTERPOLATION_SCAN_PATTERN).each do |match|
             match = match[0..0] == "$" ? match : match[1..(match.size - 1)]
@@ -410,8 +415,22 @@ module RVideo # :nodoc:
             
             raw_command.gsub!(match, value)
           end
-          
-         raw_command.scan(ONTHEFLY_SCALE_PATTERN).each do |match, width, height|
+
+          raw_command.scan(ADAPTIVE_SCALE_PATTERN).each do |match, width, height, width2, height2|
+            
+            r = original.ratio.to_f
+            aspect_4_3 = 4.0/3.0
+            
+            if (r > aspect_4_3)
+              value = format_resolution(get_resolution_and_padding(width2, height2))
+            else
+              value = format_resolution(get_resolution_and_padding(width, height))
+            end
+            
+            raw_command.gsub!(match, value)
+          end
+                    
+         raw_command.scan(SCALE_PATTERN).each do |match, width, height|
            value = format_resolution(get_resolution_and_padding(width, height))
            raw_command.gsub!(match, value)
          end
@@ -441,7 +460,7 @@ module RVideo # :nodoc:
       def inspect_original
         @original = Inspector.new(:file => options[:input_file])
       end
-
+      
     end # InstanceMethods
   end
 

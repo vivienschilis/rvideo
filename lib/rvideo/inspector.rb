@@ -196,6 +196,11 @@ module RVideo # :nodoc:
       (units[0].to_i * 60 * 60 * 1000) + (units[1].to_i * 60 * 1000) + (units[2].to_f * 1000).to_i
     end
     
+    def ratio
+      return nil unless valid?
+      width.to_f / height.to_f
+    end
+    
     # The bitrate of the movie.
     #
     # Example:
@@ -363,13 +368,21 @@ module RVideo # :nodoc:
     # The width of the video in pixels.
     def width
       return nil unless video?
-      video_match[5].to_i
+      if rotated?
+        video_match[6].to_i
+      else
+        video_match[5].to_i
+      end
     end
     
     # The height of the video in pixels.
     def height
       return nil unless video?
-      video_match[6].to_i
+      if rotated?
+        video_match[5].to_i
+      else
+        video_match[6].to_i
+      end
     end
     
     # width x height, as a string.
