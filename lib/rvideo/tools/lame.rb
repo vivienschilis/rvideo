@@ -8,6 +8,32 @@ module RVideo
         'lame'
       end
       
+      
+      def execute_with_progress(&block)
+        RVideo.logger.info("\nExecuting Command: #{@command}\n")
+        do_execute_with_progress(@command, &block)
+      rescue RVideo::CommandExecutor::ProcessHungError
+        raise TranscoderError, "Transcoder hung."
+      end
+      
+      def do_execute_with_progress(command,&block)
+        @raw_result = ''
+        CommandExecutor::execute_with_block(command, "\r") do |line|
+          progress = parse_progress(line)
+          block.call(progress) if block && progress
+          @raw_result += line + "\r"
+        end
+      end
+      
+      def parse_progress(line)
+        if line =~ /\((\d+)\%\)/
+          p = $1
+          p = 100 if p && (p.to_i > 100)
+        end
+        p
+      end
+      
+      
       private
       
       def parse_result(result)
