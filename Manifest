@@ -31,6 +31,7 @@ lib/rvideo/tools/qtfaststart.rb
 lib/rvideo/tools/segmenter.rb
 lib/rvideo/tools/yamdi.rb
 lib/rvideo/tools/handbrakecli.rb
+lib/rvideo/tools/lame.rb
 lib/rvideo/transcoder.rb
 lib/rvideo/version.rb
 rvideo.gemspec
