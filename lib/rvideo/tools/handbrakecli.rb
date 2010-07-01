@@ -49,12 +49,11 @@ module RVideo
       end
 
       def parse_progress(line)
-        if line =~ /Encoding: task (\d) of (\d), (\d{1,3}\.\d{1,2}) \%/
-          p = $3.to_i
+        if line =~ /Encoding: task \d of \d, (\d{1,3}\.\d{1,2}) \%/
+          $1.to_i > 100 ? 100 : $1.to_i
+        else
+          nil
         end
-
-        p = 100 if p && p > 100        
-        return p
       end
       
     end

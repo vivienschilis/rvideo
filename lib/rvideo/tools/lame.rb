@@ -27,12 +27,11 @@ module RVideo
       
       def parse_progress(line)
         if line =~ /\((\d+)\%\)/
-          p = $1
-          p = 100 if p && (p.to_i > 100)
+          $1.to_i > 100 ? 100 : $1.to_i
+        else
+          nil
         end
-        p
       end
-      
       
       private
       
