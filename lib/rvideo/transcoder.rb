@@ -120,8 +120,8 @@ module RVideo # :nodoc:
       precision = 1.1
       if processed.invalid?
         @errors << "Output file invalid"
-      elsif (processed.duration >= (original.duration * precision) or processed.duration <= (original.duration / precision))
-        @errors << "Original file has a duration of #{original.duration}, but processed file has a duration of #{processed.duration}"
+      elsif processed.duration <= 0
+        @errors << "Processed file has a duration of #{processed.duration}"
       end
       return @errors.size == 0
     end

@@ -97,10 +97,9 @@ module RVideo
     end
     
     it "should fail if output duration is more than 10% different than the original" do
-      @mock_original_file.should_receive(:duration).twice.and_return(10)
-      @mock_processed_file.should_receive(:duration).twice.and_return(13)
+      @mock_processed_file.should_receive(:duration).twice.and_return(0)
       @transcoder.execute(@simple_avi, @options).should be_false
-      @transcoder.errors.should == ["Original file has a duration of 10, but processed file has a duration of 13"]
+      @transcoder.errors.should == ["Processed file has a duration of 0"]
     end
     
     it "should fail if the processed file is invalid" do
