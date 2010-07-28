@@ -191,8 +191,8 @@ module RVideo # :nodoc:
             # Otherwise letterbox it
           elsif height < out_h
             resolution[:letterbox] ||= {}
-            resolution[:letterbox][:width] = out_w
-            resolution[:letterbox][:height] = out_h
+            resolution[:letterbox][:width] = out_w - (out_w % 2)
+            resolution[:letterbox][:height] = out_h - (out_h % 2)
           end
 
           return resolution

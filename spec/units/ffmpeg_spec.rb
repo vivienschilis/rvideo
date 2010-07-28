@@ -112,12 +112,21 @@ module RVideo
         ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -vf 'scale=464:348' -y '#{@options[:output_file]}'"
       end
 
+      it 'supports odd value in the padding' do
+        @mock_original_file = mock(:original, :width => 320, :height => 240, :rotated? => false)
+        RVideo::Inspector.stub!(:new).and_return(@mock_original_file)
+
+        @options.merge! :width => "225", :height => "222"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution_and_padding$ -y $output_file$", @options)
+ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -vf 'scale=224:168,pad=224:222:0:27' -y '#{@options[:output_file]}'"
+      end
+
       it 'supports :video_bit_rate' do
         @options.merge! :video_bit_rate => 666
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_bit_rate$ -y $output_file$", @options)
         ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -b 666k -y '#{@options[:output_file]}'"
       end
-      
+
       it "supports :video_bit_rate and configurable command flag" do
         Ffmpeg.video_bit_rate_parameter = "v"
         @options.merge! :video_bit_rate => 666
@@ -126,7 +135,7 @@ module RVideo
       end
       
       ###
-      
+
       it "supports :video_bit_rate_tolerance" do
         @options.merge! :video_bit_rate_tolerance => 666
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_bit_rate_tolerance$ -y $output_file$", @options)
