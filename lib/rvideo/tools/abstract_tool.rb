@@ -163,26 +163,31 @@ module RVideo # :nodoc:
           in_w = original.width.to_f
           in_h = original.height.to_f      
 
+          resolution = { :scale => { :width => out_w, :height => out_h } }
+
           begin
             aspect = in_w / in_h
             aspect_inv = in_h / in_w
           rescue
             RVideo.logger.info "Couldn't do w/h to caculate aspect. Just using the output resolution now."
-            return { :scale => { :width => out_w, :height => height } }
+            return resolution
           end
 
-          height = (out_w / aspect.to_f).to_i
-          height -= 1 if height % 2 == 1
+          width =  out_w - (out_w % 2)
+          height = (width / aspect.to_f).to_i
+          height -= (height % 2)
 
-          resolution = { :scale => { :width => out_w, :height => height } }
-
+          resolution[:scale][:width] = width
+          resolution[:scale][:height] = height
+          
           # Keep the video's original width if the height
           if height > out_h
-            width = (out_h / aspect_inv.to_f).to_i
-            width -= 1 if width % 2 == 1
-
-            resolution = { :scale => { :width => width, :height => out_h } }
-
+            even_out_h = out_h - (out_h % 2)
+            width = (even_out_h / aspect_inv.to_f).to_i
+            width -= width % 2
+            
+            resolution[:scale][:width] = width
+            resolution[:scale][:height] = even_out_h
             # Otherwise letterbox it
           elsif height < out_h
             resolution[:letterbox] ||= {}

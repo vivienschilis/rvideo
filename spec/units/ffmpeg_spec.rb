@@ -103,6 +103,15 @@ module RVideo
         ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -vf 'scale=132:100' -y '#{@options[:output_file]}'"
       end
       
+      it 'supports odd value on width or height' do
+        @mock_original_file = mock(:original, :width => 640, :height => 480, :rotated? => false)
+        RVideo::Inspector.stub!(:new).and_return(@mock_original_file)
+
+        @options.merge! :width => "620", :height => "349"
+        ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 $resolution_and_padding$ -y $output_file$", @options)
+        ffmpeg.command.should == "ffmpeg -i '#{@options[:input_file]}' -ar 44100 -ab 64 -vcodec xvid -acodec libmp3lame -r 29.97 -vf 'scale=464:348' -y '#{@options[:output_file]}'"
+      end
+
       it 'supports :video_bit_rate' do
         @options.merge! :video_bit_rate => 666
         ffmpeg = Ffmpeg.new("ffmpeg -i $input_file$ $video_bit_rate$ -y $output_file$", @options)
