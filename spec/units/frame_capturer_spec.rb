@@ -61,11 +61,10 @@ describe FrameCapturer, "calculating offset from a timecode argument" do
       f.command
   end
   
-  it "captures multiple frames with an interval" do
-    f = FrameCapturer.new :input => spec_file('kites.mp4'),
-      :interval => 5
+  it "captures using any ffmpeg binary" do
+    f = FrameCapturer.new :input => spec_file('kites.mp4'), :ffmpeg_binary => "ffmpeg06"
     assert_equal \
-      %{ffmpeg -i '#{f.input}' -ss 0  -vframes 1  -vcodec mjpeg  -y -f image2 '#{f.output}'},
+      %{ffmpeg06 -i '#{f.input}' -ss 0  -vframes 1  -vcodec mjpeg  -y -f image2 '#{f.output}'},
       f.command
   end
 end

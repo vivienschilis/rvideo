@@ -44,6 +44,8 @@ module RVideo
     end
 
     def initialize(options)
+      @ffmpeg_binary = options[:ffmpeg_binary] || "ffmpeg"
+
       @input = options[:input] || raise(ArgumentError, "need :input => /path/to/movie")
 
       @inspector = Inspector.new :file => @input
@@ -99,7 +101,7 @@ module RVideo
     private
 
     def create_command(input, output, offset)
-      "ffmpeg -i #{input.shell_quoted} -ss #{offset}  -vframes 1  -vcodec mjpeg  -y -f image2 #{output.shell_quoted}"
+      "#{@ffmpeg_binary} -i #{input.shell_quoted} -ss #{offset}  -vframes 1  -vcodec mjpeg  -y -f image2 #{output.shell_quoted}"
     end
 
     def parse_options(options)
