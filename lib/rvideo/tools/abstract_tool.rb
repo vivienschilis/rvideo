@@ -154,6 +154,12 @@ module RVideo # :nodoc:
           format_resolution(get_resolution_and_padding)
         end
 
+        def resolution_keep_aspect_ratio
+          resolution = get_resolution_and_padding
+          resolution.delete(:letterbox)
+          format_resolution(resolution)
+        end
+
         def get_resolution_and_padding(out_w = @options["width"], out_h = @options["height"])
           # Calculate resolution and any padding
           
