@@ -77,6 +77,8 @@ module RVideo
         raise ProcessHungError
       ensure
         Process.kill("SIGKILL", pid)
+        Process.waitpid2 pid
+        [stdin, stdout, stderr].each{|io| io.close}
       end
     end
     
