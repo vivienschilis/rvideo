@@ -402,6 +402,8 @@ module RVideo # :nodoc:
       @orientation ||= stdout.chomp.to_i
     rescue Timeout::Error => e  
       0
+    rescue
+      0
     end
     
     def rotated?
