@@ -397,7 +397,11 @@ module RVideo # :nodoc:
     end
     
     def video_orientation
-      @orientation ||= `qtrotate #{full_filename}`.chomp.to_i
+      stdout=''
+      open4.spawn "qtrotate #{full_filename}", :stdout=> stdout, :timeout => 10
+      @orientation ||= stdout.chomp.to_i
+    rescue Timeout::Error => e  
+      0
     end
     
     def rotated?
