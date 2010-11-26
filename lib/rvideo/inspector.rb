@@ -300,10 +300,12 @@ module RVideo # :nodoc:
     
     def audio_channels
       return nil unless audio?
-
+      
       case audio_match[5]
       when "mono"   then 1
       when "stereo" then 2
+      when /(\d+) channels/ then $1.to_i
+      when /^(\d.\d)$/ then $1.to_i+$2.to_i
       else
         raise RuntimeError, "Unknown number of channels"
       end
@@ -439,18 +441,18 @@ module RVideo # :nodoc:
     #
     def fps
       return nil unless video?
-      video_match[2] or video_match[11]
+      video_match[2] || video_match[13] || video_match[14]
     end
     alias_method :framerate, :fps
     
     def time_base
       return nil unless video?
-      video_match[12]
+      video_match[14]
     end
     
     def codec_time_base
       return nil unless video?
-      video_match[13]
+      video_match[15]
     end
     
     private
@@ -467,13 +469,14 @@ module RVideo # :nodoc:
     VAL = '([^,]+)'
     
     RATE = '([\d.]+k?)'
+    PAR_DAR = '(?:\s*\[?(?:PAR\s*(\d+:\d+))?\s*(?:DAR\s*(\d+:\d+))?\]?)?'
     
     AUDIO_MATCH_PATTERN = /
       Stream\s+(.*?)[,:\(\[].*?\s*
       Audio:\s+
       #{VAL}#{SEP}           # codec
       #{RATE}\s+(\w*)#{SEP}? # sample rate
-      ([a-zA-Z:]*)#{SEP}?    # channels
+      #{VAL}#{SEP}?          # channels
       (?:s(\d+)#{SEP}?)?     # audio sample bit depth
       (?:(\d+)\s+(\S+))?     # audio bit rate
     /x
@@ -493,10 +496,12 @@ module RVideo # :nodoc:
       #{VAL}#{SEP}                                                # codec
       (?:#{VAL}#{SEP})?                                           # color space
       (\d+)x(\d+)                                                 # resolution
-        (?:\s*\[?(?:PAR\s*(\d+:\d+))?\s*(?:DAR\s*(\d+:\d+))?\]?)? # pixel and display aspect ratios
-        #{SEP}?
+      #{PAR_DAR}                                                  # pixel and display aspect ratios
+      #{SEP}?
       (?:#{RATE}\s*(kb\/s)#{SEP}?)?                               # video bit rate
-      (?:#{RATE}\s*(?:tb\(?r\)?|#{FPS})#{SEP}?)?                  # frame rate
+      #{PAR_DAR}#{SEP}?                                           # pixel and display aspect ratios
+      (?:#{RATE}\s*#{FPS}#{SEP}?)?                                # frame rate
+      (?:#{RATE}\s*tbr#{SEP}?)?                                   # time base
       (?:#{RATE}\s*tbn#{SEP}?)?                                   # time base
       (?:#{RATE}\s*tbc#{SEP}?)?                                   # codec time base
     /x

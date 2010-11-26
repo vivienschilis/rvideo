@@ -1,7 +1,8 @@
 require File.dirname(__FILE__) + "/../spec_helper"
-
 module RVideo
+  
   describe Inspector, "with boat.avi" do
+    
     before(:each) do
       @i = Inspector.new :file => spec_file("boat.avi")
     end
@@ -71,7 +72,7 @@ module RVideo
     end
     
     it "gives the audio channels as a string" do
-      assert_equal "mono", @i.audio_channels_string
+      assert_equal "1 channels", @i.audio_channels_string
     end
     
     it "knows the audio bit rate" do
@@ -109,4 +110,16 @@ module RVideo
       assert_equal "11:9", @i.display_aspect_ratio
     end
   end
+  
+  describe Inspector, "with kites.mp4" do
+    before(:each) do
+      @i = Inspector.new :file => '/Users/vivien/Downloads/995b7684b98fac47b7b9affd5578c15a.avi'
+    end
+    
+    it "knows the pixel aspect ratio" do
+      assert_equal "384 kb/s", @i.audio_bit_rate_with_units
+    end
+
+  end
+  
 end
