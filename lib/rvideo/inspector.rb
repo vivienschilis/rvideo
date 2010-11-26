@@ -305,7 +305,7 @@ module RVideo # :nodoc:
       when "mono"   then 1
       when "stereo" then 2
       when /(\d+) channels/ then $1.to_i
-      when /^(\d.\d)$/ then $1.to_i+$2.to_i
+      when /^(\d).(\d)$/ then $1.to_i+$2.to_i
       else
         raise RuntimeError, "Unknown number of channels"
       end
