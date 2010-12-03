@@ -49,7 +49,7 @@ describe FrameCapturer, "calculating offset from a timecode argument" do
   it "captures one frame at the start with no arguments" do
     f = FrameCapturer.new :input => spec_file('kites.mp4')
     assert_equal \
-      %{ffmpeg -i '#{f.input}' -ss 0  -vframes 1  -vcodec mjpeg  -y -f image2 '#{f.output}'},
+      %{ffmpeg -i '#{f.input}' -ss 0  -vframes 1  -vcodec mjpeg  -y -f image2 -vf 'scale=0:0' '#{f.output}'},
       f.command
   end
   
@@ -57,14 +57,14 @@ describe FrameCapturer, "calculating offset from a timecode argument" do
     f = FrameCapturer.new :input => spec_file('kites.mp4'),
       :offset => 10
     assert_equal \
-      %{ffmpeg -i '#{f.input}' -ss 10.0  -vframes 1  -vcodec mjpeg  -y -f image2 '#{f.output}'},
+      %{ffmpeg -i '#{f.input}' -ss 10.0  -vframes 1  -vcodec mjpeg  -y -f image2 -vf 'scale=0:0' '#{f.output}'},
       f.command
   end
   
   it "captures using any ffmpeg binary" do
     f = FrameCapturer.new :input => spec_file('kites.mp4'), :ffmpeg_binary => "ffmpeg06"
     assert_equal \
-      %{ffmpeg06 -i '#{f.input}' -ss 0  -vframes 1  -vcodec mjpeg  -y -f image2 '#{f.output}'},
+      %{ffmpeg06 -i '#{f.input}' -ss 0  -vframes 1  -vcodec mjpeg  -y -f image2 -vf 'scale=0:0' '#{f.output}'},
       f.command
   end
 end

@@ -370,7 +370,7 @@ module RVideo # :nodoc:
     # The width of the video in pixels.
     def width
       return nil unless video?
-      if rotated?
+      if aspect_rotated?
         video_match[6].to_i
       else
         video_match[5].to_i
@@ -380,7 +380,7 @@ module RVideo # :nodoc:
     # The height of the video in pixels.
     def height
       return nil unless video?
-      if rotated?
+      if aspect_rotated?
         video_match[5].to_i
       else
         video_match[6].to_i
@@ -402,14 +402,18 @@ module RVideo # :nodoc:
       stdout=''
       open4.spawn "qtrotate #{full_filename}", :stdout=> stdout, :timeout => 10
       @orientation ||= stdout.chomp.to_i
-    rescue Timeout::Error => e  
+    rescue Timeout::Error
       0
     rescue
       0
     end
     
     def rotated?
-      video_orientation == 90 || video_orientation == 180  
+      video_orientation != 0
+    end
+    
+    def aspect_rotated?
+      video_orientation % 180 == 90
     end
     
     def pixel_aspect_ratio

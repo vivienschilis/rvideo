@@ -101,7 +101,9 @@ module RVideo
     private
 
     def create_command(input, output, offset)
-      "#{@ffmpeg_binary} -i #{input.shell_quoted} -ss #{offset}  -vframes 1  -vcodec mjpeg  -y -f image2 #{output.shell_quoted}"
+      options = {:input_file => input, :output_file => output}
+      ffmpeg = RVideo::Tools::Ffmpeg.new("#{@ffmpeg_binary} -i $input_file$ -ss #{offset}  -vframes 1  -vcodec mjpeg  -y -f image2 $resolution$ $output_file$", options)
+      ffmpeg.command
     end
 
     def parse_options(options)
