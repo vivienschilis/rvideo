@@ -79,4 +79,28 @@ describe RVideo::CommandExecutor do
     end
   end
 
+  it "should save stdout and stderr" do
+    string = ""
+    stderr_res = nil
+    stdout_res = nil
+    stderr_res, stdout_res = CommandExecutor::execute_with_block("echo abc; echo def 1>&2;", '\r') do |line|
+      string << line
+    end
+    
+    stderr_res.should == "def\n"
+    stdout_res.should == "abc\n"
+  end
+
+  it "should save stdout and stderr using stdout" do
+    string = ""
+    stderr_res = nil
+    stdout_res = nil
+    stderr_res, stdout_res = CommandExecutor::execute_with_block("echo abc; echo def 1>&2;", '\r', false) do |line|
+      string << line
+    end
+    
+    stderr_res.should == "def\n"
+    stdout_res.should == "abc\n"
+  end
+
 end

@@ -60,11 +60,12 @@ module RVideo
       
       def do_execute_with_progress(command,&block)
         @raw_result = ''
-        CommandExecutor::execute_with_block(command, "\r", false) do |line|
+        stderr_result, stdout_result = CommandExecutor::execute_with_block(command, "\r", false) do |line|
           progress = parse_progress(line)
           block.call(progress) if block && progress
-          @raw_result += line + "\r"            
+          @raw_result += line + "\r"
         end
+        @raw_result += stderr_result
       end
       
       def parse_progress(line)

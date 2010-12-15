@@ -69,16 +69,26 @@ module RVideo
       begin
         pid, stdin, stdout, stderr = Open4::open4(command)
         c_pipe = use_stderr ? stderr : stdout
-        
+        pipe_result = ''
+
         c_pipe.each_with_timeout(STDOUT_TIMEOUT, line_separator) do |line|
           yield line
+          pipe_result += line
         end
+          Process.kill("SIGKILL", pid)
+          Process.waitpid2 pid
+          
+          stdout_result = use_stderr ? stdout.read : pipe_result
+          stderr_result =  use_stderr ? pipe_result : stderr.read
+          
+          [stdin, stdout, stderr].each{|io| io.close}
+          
+          return [stderr_result, stdout_result]
       rescue Timeout::Error => e
+          Process.kill("SIGKILL", pid)
+          Process.waitpid2 pid
+          [stdin, stdout, stderr].each{|io| io.close}
         raise ProcessHungError
-      ensure
-        Process.kill("SIGKILL", pid)
-        Process.waitpid2 pid
-        [stdin, stdout, stderr].each{|io| io.close}
       end
     end
     
