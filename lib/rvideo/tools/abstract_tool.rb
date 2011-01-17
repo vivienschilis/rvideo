@@ -162,23 +162,22 @@ module RVideo # :nodoc:
 
         def get_resolution_and_padding(out_w = @options["width"], out_h = @options["height"])
           # Calculate resolution and any padding
-          
           out_w = out_w.to_f
           out_h = out_h.to_f
-
-          in_w = original.width.to_f
-          in_h = original.height.to_f      
-
+          
           resolution = { :scale => { :width => out_w, :height => out_h } }
+          
+          in_w = original.width.to_f
+          in_h = original.height.to_f
 
-          begin
+          if(in_w <= 0 || in_h <= 0)
+            aspect= out_w / out_h
+          else
             aspect = in_w / in_h
-            aspect_inv = in_h / in_w
-          rescue
-            RVideo.logger.info "Couldn't do w/h to caculate aspect. Just using the output resolution now."
-            return resolution
           end
 
+          aspect_inv = 1 / aspect
+          
           width =  out_w - (out_w % 2)
           height = (width / aspect.to_f).to_i
           height -= (height % 2)
@@ -195,12 +194,21 @@ module RVideo # :nodoc:
             resolution[:scale][:width] = width
             resolution[:scale][:height] = even_out_h
             # Otherwise letterbox it
-          elsif height < out_h
-            resolution[:letterbox] ||= {}
-            resolution[:letterbox][:width] = out_w - (out_w % 2)
-            resolution[:letterbox][:height] = out_h - (out_h % 2)
+          elsif height < out_h 
+            width_letterbox = out_w - (out_w % 2)
+            height_letterbox = out_h - (out_h % 2)
+            
+            if (resolution[:scale][:width] - width_letterbox +
+                resolution[:scale][:height] - height_letterbox != 0)
+              resolution[:letterbox] ||= {}
+              resolution[:letterbox][:width] = width_letterbox
+              resolution[:letterbox][:height] = height_letterbox
+            end
           end
-
+        
+          return resolution
+        rescue
+          RVideo.logger.info "Couldn't do w/h to caculate aspect. Just using the output resolution now."
           return resolution
         end
 
