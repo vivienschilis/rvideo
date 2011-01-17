@@ -115,7 +115,10 @@ module RVideo
           ptb = ((params[:letterbox][:height] - params[:scale][:height]) / 2).to_i
           width = params[:letterbox][:width]
           heigth = params[:letterbox][:height]
-          p << "pad=#{width.to_i}:#{heigth.to_i}:#{plr.to_i}:#{ptb.to_i}" 
+          
+          if(plr > 0 || ptb > 0)
+            p << "pad=#{width.to_i}:#{heigth.to_i}:#{plr.to_i}:#{ptb.to_i}"
+          end
         end
         %(-vf '#{p.join(',')}')
       end

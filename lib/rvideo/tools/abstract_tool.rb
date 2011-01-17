@@ -198,12 +198,9 @@ module RVideo # :nodoc:
             width_letterbox = out_w - (out_w % 2)
             height_letterbox = out_h - (out_h % 2)
             
-            if (resolution[:scale][:width] - width_letterbox +
-                resolution[:scale][:height] - height_letterbox != 0)
-              resolution[:letterbox] ||= {}
-              resolution[:letterbox][:width] = width_letterbox
-              resolution[:letterbox][:height] = height_letterbox
-            end
+            resolution[:letterbox] ||= {}
+            resolution[:letterbox][:width] = width_letterbox
+            resolution[:letterbox][:height] = height_letterbox
           end
         
           return resolution
