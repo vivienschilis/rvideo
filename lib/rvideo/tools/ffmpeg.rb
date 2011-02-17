@@ -47,7 +47,7 @@ module RVideo
       
       attr_reader :frame, :q, :size, :time, :output_bitrate, :video_size, :audio_size, :header_size, :overhead, :psnr, :output_fps, :pid
       
-      def initialize(raw_command, options = {})        
+      def initialize(raw_command, options = {})
         @raw_command = raw_command
         @options = HashWithIndifferentAccess.new(options)
         @command = interpolate_variables(raw_command)
@@ -106,11 +106,12 @@ module RVideo
       end
       
       def format_resolution(params={})
-        p = []
         inspect_original if @original.nil?
+        p = []
         p << ["rotate=#{@original.video_orientation}"] if @original.rotated?
         p << ["scale=#{params[:scale][:width].to_i}:#{params[:scale][:height].to_i}"]
-        if params[:letterbox]
+        
+        if params.has_key?(:letterbox)
           plr = ((params[:letterbox][:width] - params[:scale][:width]) / 2).to_i
           ptb = ((params[:letterbox][:height] - params[:scale][:height]) / 2).to_i
           width = params[:letterbox][:width]
@@ -141,7 +142,7 @@ module RVideo
         CommandExecutor::execute_with_block(command, "\r") do |line|
           progress, duration = parse_progress(line, duration)
           block.call(progress) if block && progress
-          @raw_result += line.to_s + "\r"            
+          @raw_result += line.to_s + "\r"
         end
       end
       
@@ -194,7 +195,7 @@ private
         if m = /\n(.*)Unknown Format$/.match(result)
           raise TranscoderError::InvalidFile, "unknown format (#{m[1]})"
         end
-        
+
         if m = /\nERROR.*/m.match(result)
           raise TranscoderError::InvalidFile, m[0]
         end

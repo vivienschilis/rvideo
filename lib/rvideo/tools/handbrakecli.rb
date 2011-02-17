@@ -28,7 +28,7 @@ module RVideo
         end
                 
         if m = /No such file or directory/.match(result)
-          raise TranscoderError::InvalidFile, "No such file or directory"          
+          raise TranscoderError::InvalidFile, "No such file or directory"
         end
         
         if m = /Undefined error:/.match(result)
